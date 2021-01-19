@@ -18,6 +18,14 @@ return [
     'homeUrl' => $url_backend, 
     'modules' => [
 
+        'mdata' => [
+            'class' => 'backend\modules\mdata\Module',
+        ],
+
+         'laporan' => [
+            'class' => 'backend\modules\laporan\Module',
+        ],
+
     ],
     'components' => [
         'request' => [
