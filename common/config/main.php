@@ -1,7 +1,7 @@
 <?php
 use kartik\datecontrol\Module;
 use kartik\report\Report;
-$url_utama = '/scelton/';
+$url_utama = '/listing/';
 
 return [
     'name'=>'Esindo 1.0',

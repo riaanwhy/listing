@@ -8,7 +8,7 @@ $params = array_merge(
     require __DIR__ . '/params-local.php'
 );
 
-$url_htaccess = '/scelton'; //disesuaikan dengan .htaccess
+$url_htaccess = '/listing'; //disesuaikan dengan .htaccess
 return [
     'id' => 'app-frontend',
     'basePath' => dirname(__DIR__),

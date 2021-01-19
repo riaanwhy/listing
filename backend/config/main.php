@@ -8,7 +8,7 @@ $params = array_merge(
     require __DIR__ . '/params-local.php'
 );
 
-$url_backend = '/scelton/admin'; //jika online kosongkan saja cukup /admin
+$url_backend = '/listing/admin'; //jika online kosongkan saja cukup /admin
 $prettyUrl = array ('0'=>'site/index','1'=>'/prioritas');
 return [
     'id' => 'app-backend',
