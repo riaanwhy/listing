@@ -2,6 +2,11 @@
 
 use yii\helpers\Html;
 use yii\grid\GridView;
+use backend\modules\mdata\models\Countries;
+
+use yii\helpers\ArrayHelper;
+
+use kartik\select2\Select2;
 
 /* @var $this yii\web\View */
 /* @var $searchModel backend\modules\mdata\models\CountriesSearch */
@@ -27,6 +32,18 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'id',
             'name',
+            [
+                'attribute' => 'name',
+                'filter' => ArrayHelper::map(Countries::find()->asArray()->all(), 'name', 'name'),
+                'filterType' => GridView::FILTER_SELECT2,
+                'filterWidgetOptions' => [
+                    'options' => ['prompt' => ''],
+                    'pluginOptions' => [
+                        'allowClear' => true,
+                        'width'=>'resolve'
+                    ],
+                ],
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],
