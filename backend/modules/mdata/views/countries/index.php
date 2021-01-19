@@ -1,9 +1,8 @@
 <?php
 
 use yii\helpers\Html;
-use yii\grid\GridView;
 use backend\modules\mdata\models\Countries;
-
+use kartik\grid\GridView;
 use yii\helpers\ArrayHelper;
 
 use kartik\select2\Select2;
@@ -29,8 +28,6 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
-
-            'id',
             'name',
             [
                 'attribute' => 'name',
@@ -40,7 +37,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'options' => ['prompt' => ''],
                     'pluginOptions' => [
                         'allowClear' => true,
-                        'width'=>'resolve'
+                        'width'=>'200px'
                     ],
                 ],
             ],
