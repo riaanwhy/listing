@@ -3,12 +3,14 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model backend\modules\mdata\models\Sectors */
+/* @var $model backend\modules\mdata\models\sectors */
 
-$this->title = 'Update Sectors: ' . $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Sectors', 'url' => ['index']];
+$this->title = Yii::t('app', 'Update Sectors: {name}', [
+    'name' => $model->name,
+]);
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Sectors'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'id' => $model->id]];
-$this->params['breadcrumbs'][] = 'Update';
+$this->params['breadcrumbs'][] = Yii::t('app', 'Update');
 ?>
 <div class="sectors-update">
 

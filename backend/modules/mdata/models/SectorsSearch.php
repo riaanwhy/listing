@@ -4,12 +4,12 @@ namespace backend\modules\mdata\models;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use backend\modules\mdata\models\Sectors;
+use backend\modules\mdata\models\sectors;
 
 /**
- * SectorsSearch represents the model behind the search form of `backend\modules\mdata\models\Sectors`.
+ * SectorsSearch represents the model behind the search form of `backend\modules\mdata\models\sectors`.
  */
-class SectorsSearch extends Sectors
+class SectorsSearch extends sectors
 {
     /**
      * {@inheritdoc}
@@ -40,7 +40,7 @@ class SectorsSearch extends Sectors
      */
     public function search($params)
     {
-        $query = Sectors::find();
+        $query = sectors::find();
 
         // add conditions that should always apply here
 

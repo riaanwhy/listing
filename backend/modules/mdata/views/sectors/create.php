@@ -3,10 +3,10 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model backend\modules\mdata\models\Sectors */
+/* @var $model backend\modules\mdata\models\sectors */
 
-$this->title = 'Create Sectors';
-$this->params['breadcrumbs'][] = ['label' => 'Sectors', 'url' => ['index']];
+$this->title = Yii::t('app', 'Create Sectors');
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Sectors'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="sectors-create">
