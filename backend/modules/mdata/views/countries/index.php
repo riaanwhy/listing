@@ -4,9 +4,7 @@ use yii\helpers\Html;
 use backend\modules\mdata\models\Countries;
 use kartik\grid\GridView;
 use yii\helpers\ArrayHelper;
-
 use kartik\select2\Select2;
-
 /* @var $this yii\web\View */
 /* @var $searchModel backend\modules\mdata\models\CountriesSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
