@@ -2,7 +2,12 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-
+use yii\helpers\ArrayHelper;
+use kartik\select2\Select2;
+use backend\modules\mdata\models\Companies;
+use backend\modules\mdata\models\Countries;
+use backend\modules\mdata\models\Finances;
+use backend\modules\mdata\models\Sectors;
 /* @var $this yii\web\View */
 /* @var $model backend\modules\mdata\models\Finances */
 /* @var $form yii\widgets\ActiveForm */
@@ -12,7 +17,13 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'company_id')->textInput() ?>
+    <?php echo $form->field($model, 'company_id')->label(false)->widget(Select2::classname(), ['data' => ArrayHelper::map(Countries::find()->asArray()->all(), 'id', 'name'),
+           'options' => ['placeholder' => 'Project'],
+            'pluginOptions' => [
+                'width'=>'200px',
+                'allowClear' => true,                               
+                                ],
+            ])->label("Company_id");?>
 
     <?= $form->field($model, 'year')->textInput(['maxlength' => true]) ?>
 

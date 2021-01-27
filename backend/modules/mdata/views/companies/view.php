@@ -32,8 +32,14 @@ $this->params['breadcrumbs'][] = $this->title;
             'id',
             'sic_code',
             'name',
-            'sector',
-            'sub_sector',
+            [
+                'label' => 'Sectors',
+                'value'=>$model->sector0->name,
+            ], 
+             [
+                'label' => 'sub_sector',
+                'value'=>$model->subSector->name,
+            ], 
             'country',
             'exchange',
             'website',

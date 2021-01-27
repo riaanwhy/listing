@@ -79,8 +79,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
             //'country',
-            'exchange',
-            'website',
+            //'exchange',
+            //'website',
             //'profile:ntext',
             //'created_at',
             //'updated_at',

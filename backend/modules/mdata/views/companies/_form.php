@@ -2,11 +2,12 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-
-
 use yii\helpers\ArrayHelper;
 use kartik\select2\Select2;
 use backend\modules\mdata\models\Countries;
+use backend\modules\mdata\models\Sectors;
+use backend\modules\mdata\models\Companies;
+use backend\modules\mdata\models\Finances;
 /* @var $this yii\web\View */
 /* @var $model backend\modules\mdata\models\Companies */
 /* @var $form yii\widgets\ActiveForm */
@@ -20,9 +21,22 @@ use backend\modules\mdata\models\Countries;
 
     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'sector')->textInput() ?>
+  
+     <?php echo $form->field($model, 'sector')->label(false)->widget(Select2::classname(), ['data' => ArrayHelper::map(Sectors::find()->asArray()->all(), 'id', 'name'),
+           'options' => ['placeholder' => 'Project'],
+            'pluginOptions' => [
+                'width'=>'200px',
+                'allowClear' => true,                               
+                                ],
+            ])->label("Sector");?>
 
-    <?= $form->field($model, 'sub_sector')->textInput() ?>
+    <?php echo $form->field($model, 'sub_sector')->label(false)->widget(Select2::classname(), ['data' => ArrayHelper::map(Sectors::find()->asArray()->all(), 'id', 'name'),
+           'options' => ['placeholder' => 'Project'],
+            'pluginOptions' => [
+                'width'=>'200px',
+                'allowClear' => true,                               
+                                ],
+            ])->label("sub_sector");?>
 
     <?php //echo $form->field($model, 'country')->textInput() ?>
 
