@@ -53,7 +53,7 @@ class CountriesController extends Controller
     /**
      * Displays a single Countries model.
      * @param integer $id
-     * @return mixed
+     * @return mixedc
      * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionView($id)
