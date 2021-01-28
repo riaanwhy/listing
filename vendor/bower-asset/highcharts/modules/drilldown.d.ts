@@ -30,8 +30,7 @@ declare module "../highcharts" {
         addSeriesAsDrilldown(point: Point, options: SeriesOptionsType): void;
         /**
          * When the chart is drilled down to a child series, calling
-         * `chart.drillUp()` will drill up to the parent series. Requires the
-         * drilldown module.
+         * `chart.drillUp()` will drill up to the parent series.
          */
         drillUp(): void;
     }
@@ -42,7 +41,7 @@ declare module "../highcharts" {
          * @param animation
          *        The animation options for the element fade.
          */
-        fadeIn(animation?: (boolean|AnimationOptionsObject)): void;
+        fadeIn(animation?: (boolean|Partial<AnimationOptionsObject>)): void;
     }
 }
 export default factory;

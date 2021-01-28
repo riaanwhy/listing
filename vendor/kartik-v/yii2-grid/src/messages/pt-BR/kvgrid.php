@@ -21,7 +21,7 @@ return [
     'Active' => 'Ativo',
     'Add Book' => 'Adicionar Livro',
     'All' => 'Todos',
-    'Are you sure to delete this {item}?' => 'Você tem certeza de que deseja excluir esse {item}',
+    'Are you sure to delete this {item}?' => 'Você tem certeza de que deseja excluir esse {item}?',
     'Book Listing' => 'Listagem dos Livros',
     'CSV' => 'CSV',
     'Clear selection' => 'Limpar seleção',
@@ -89,5 +89,6 @@ return [
     'items-many' => 'muitos itens',
     'krajee, grid, export, yii2-grid, pdf' => 'krajee, grid, export, yii2-grid, pdf',
     '© Krajee Yii2 Extensions' => '© Krajee Yii2 Extensões',
+    '<small>Loading &hellip;</small>' => '',
     'items-acc' => '',
 ];

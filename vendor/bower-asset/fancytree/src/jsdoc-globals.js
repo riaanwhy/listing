@@ -159,13 +159,16 @@ var TreePatch = {};
  *     Recommended place to store shared data for column rendering.
  *     See also <a href="https://github.com/mar10/fancytree/wiki/ExtTable">table extension</a>.
  *     @since 2.27
+ * @property {boolean} copyFunctionsToData Copy also functions to the node's data property (default: false)
  * @property {Integer} debugLevel 0..4 (null: use global setting $.ui.fancytree.debugLevel)
  * @property {function} defaultKey callback(node) is called for new nodes without a key. Must return a new unique key. (default null: generates default keys like that: "_" + counter)
- * @property {boolean} enableAspx Accept passing ajax data in a property named `d` (default: true).
+ * @property {boolean} <del>enableAspx</del> Accept passing ajax data in a property named `d` (default: true).
+ *     @deprecated Call `data.result = data.response.d` in the `postProcess`event instead
  * @property {boolean} escapeTitles Make sure all HTML tags are escaped (default: false).
  * @property {string[]} extensions List of active extensions (default: [])
  * @property {boolean} focusOnSelect Set focus when node is checked by a mouse click (default: false)
- * @property {boolean} generateIds Add `id="..."` to node markup (default: false).
+ * @property {boolean} generateIds Add `id="..."` to node markup (default: false).<br>
+ *     The id is constructed from `options.idPrefix` + `node.key`, e.g. `id="ft_1234"`.
  * @property {boolean|function} icon Display node icons (default: true)<br>
  *     true: use default icons, depending on `node.folder` and `node.expanded`<br>
  *     false: hide icons<br>
@@ -264,6 +267,7 @@ var FancytreeOptions = {};
  * @property {function} beforeUpdateViewport ext-grid is about to redraw the tree.viewport.<br>
  *     `data.next`: viewport settings that will be applied.<br>
  *     `data.diff`: changes to the current `tree.viewport`, e.g. start offset.<br>
+ *     `data.reason`: a string describing the type of change.<br>
  *     `data.scrollOnly`: true if only the `start` value has changed.<br>
  *     Modify `next` or return `false` to prevent default processing.
  * @property {function} blur `data.node` lost keyboard focus
@@ -290,6 +294,7 @@ var FancytreeOptions = {};
  *     The tree widget was initialized, source data was loaded, visible nodes are rendered,
  *     selection propagation applied, and node activated.<br>
  *     `data.status` is false on load error.<br>
+ *     Note: `preInit` is fired before nodes are loaded.<br>
  *     Note: if ext-persist is used, see also the `restore` event, which is fired later.
  * @property {function} keydown `data.node` received key. `event.which` contains the key. Return `false` to prevent default processing, i.e. navigation. Call `data.result = "preventNav";` to prevent navigation but still allow default handling inside embedded input controls.
  * @property {function} keypress (currently unused)
@@ -302,6 +307,8 @@ var FancytreeOptions = {};
  *     Note that this event is not necessarily fired for each single deleted or added node, when a hierarchy. was modified.<br>
  *     This event is only available as callback, but not for bind().
  * @property {function} postProcess Allows to modify the ajax response
+ * @property {function} preInit Widget markup was created, but no data loaded yet.<br>
+ *     @see init
  * @property {function} <del>removeNode</del> @deprecated use `modifyChild` with operation: 'remove' instead.
  * @property {function} renderColumns (used by table extension)
  * @property {function} renderStatusColumns (used by table extension)
@@ -312,6 +319,7 @@ var FancytreeOptions = {};
  * @property {function} updateViewport ext-grid has redrawn the tree.viewport.<br>
  *     `data.prev`: viewport settings that were active before this update.<br>
  *     `data.diff`: changes to the current `tree.viewport`, e.g. start offset.<br>
+ *     `data.reason`: a string describing the type of change.<br>
  *     `data.scrollOnly`: true if only the `start` value has changed.
  */
 var FancytreeEvents = {};

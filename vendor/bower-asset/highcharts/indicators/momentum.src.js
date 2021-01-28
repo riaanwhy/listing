@@ -1,5 +1,5 @@
 /**
- * @license Highstock JS v7.2.0 (2019-09-03)
+ * @license Highstock JS v8.2.2 (2020-10-22)
  *
  * Indicator series type for Highstock
  *
@@ -28,28 +28,24 @@
             obj[path] = fn.apply(null, args);
         }
     }
-    _registerModule(_modules, 'indicators/momentum.src.js', [_modules['parts/Globals.js'], _modules['parts/Utilities.js']], function (H, U) {
+    _registerModule(_modules, 'Stock/Indicators/MomentumIndicator.js', [_modules['Core/Series/Series.js'], _modules['Core/Utilities.js']], function (BaseSeries, U) {
         /* *
          *
          *  License: www.highcharts.com/license
          *
+         *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
+         *
          * */
-
-
-
         var isArray = U.isArray;
-
-        var seriesType = H.seriesType;
-
+        // im port './SMAIndicator.js';
+        /* eslint-disable require-jsdoc */
         function populateAverage(points, xVal, yVal, i, period) {
             var mmY = yVal[i - 1][3] - yVal[i - period - 1][3],
                 mmX = xVal[i - 1];
-
             points.shift(); // remove point until range < period
-
             return [mmX, mmY];
         }
-
+        /* eslint-enable require-jsdoc */
         /**
          * The Momentum series type.
          *
@@ -59,83 +55,76 @@
          *
          * @augments Highcharts.Series
          */
-        seriesType(
-            'momentum',
-            'sma',
-            /**
-             * Momentum. This series requires `linkedTo` option to be set.
-             *
-             * @sample stock/indicators/momentum
-             *         Momentum indicator
-             *
-             * @extends      plotOptions.sma
-             * @since        6.0.0
-             * @product      highstock
-             * @optionparent plotOptions.momentum
-             */
-            {
-                params: {
-                    period: 14
+        BaseSeries.seriesType('momentum', 'sma', 
+        /**
+         * Momentum. This series requires `linkedTo` option to be set.
+         *
+         * @sample stock/indicators/momentum
+         *         Momentum indicator
+         *
+         * @extends      plotOptions.sma
+         * @since        6.0.0
+         * @product      highstock
+         * @requires     stock/indicators/indicators
+         * @requires     stock/indicators/momentum
+         * @optionparent plotOptions.momentum
+         */
+        {
+            params: {
+                period: 14
+            }
+        }, 
+        /**
+         * @lends Highcharts.Series#
+         */
+        {
+            nameBase: 'Momentum',
+            getValues: function (series, params) {
+                var period = params.period,
+                    xVal = series.xData,
+                    yVal = series.yData,
+                    yValLen = yVal ? yVal.length : 0,
+                    xValue = xVal[0],
+                    yValue = yVal[0],
+                    MM = [],
+                    xData = [],
+                    yData = [],
+                    index,
+                    i,
+                    points,
+                    MMPoint;
+                if (xVal.length <= period) {
+                    return;
                 }
-            },
-            /**
-             * @lends Highcharts.Series#
-             */
-            {
-                nameBase: 'Momentum',
-                getValues: function (series, params) {
-                    var period = params.period,
-                        xVal = series.xData,
-                        yVal = series.yData,
-                        yValLen = yVal ? yVal.length : 0,
-                        xValue = xVal[0],
-                        yValue = yVal[0],
-                        MM = [],
-                        xData = [],
-                        yData = [],
-                        index,
-                        i,
-                        points,
-                        MMPoint;
-
-                    if (xVal.length <= period) {
-                        return false;
-                    }
-
-                    // Switch index for OHLC / Candlestick / Arearange
-                    if (isArray(yVal[0])) {
-                        yValue = yVal[0][3];
-                    } else {
-                        return false;
-                    }
-                    // Starting point
-                    points = [
-                        [xValue, yValue]
-                    ];
-
-
-                    // Calculate value one-by-one for each period in visible data
-                    for (i = (period + 1); i < yValLen; i++) {
-                        MMPoint = populateAverage(points, xVal, yVal, i, period, index);
-                        MM.push(MMPoint);
-                        xData.push(MMPoint[0]);
-                        yData.push(MMPoint[1]);
-                    }
-
+                // Switch index for OHLC / Candlestick / Arearange
+                if (isArray(yVal[0])) {
+                    yValue = yVal[0][3];
+                }
+                else {
+                    return;
+                }
+                // Starting point
+                points = [
+                    [xValue, yValue]
+                ];
+                // Calculate value one-by-one for each period in visible data
+                for (i = (period + 1); i < yValLen; i++) {
                     MMPoint = populateAverage(points, xVal, yVal, i, period, index);
                     MM.push(MMPoint);
                     xData.push(MMPoint[0]);
                     yData.push(MMPoint[1]);
-
-                    return {
-                        values: MM,
-                        xData: xData,
-                        yData: yData
-                    };
                 }
+                MMPoint = populateAverage(points, xVal, yVal, i, period, index);
+                MM.push(MMPoint);
+                xData.push(MMPoint[0]);
+                yData.push(MMPoint[1]);
+                return {
+                    values: MM,
+                    xData: xData,
+                    yData: yData
+                };
             }
-        );
-
+        });
         /**
          * A `Momentum` series. If the [type](#series.momentum.type) option is not
          * specified, it is inherited from [chart.type](#chart.type).
@@ -144,8 +133,11 @@
          * @since     6.0.0
          * @excluding dataParser, dataURL
          * @product   highstock
+         * @requires  stock/indicators/indicators
+         * @requires  stock/indicators/momentum
          * @apioption series.momentum
          */
+        ''; // to include the above in the js output
 
     });
     _registerModule(_modules, 'masters/indicators/momentum.src.js', [], function () {

@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v7.2.0 (2019-09-03)
+ * @license Highcharts JS v8.2.2 (2020-10-22)
  *
  * Highcharts cylinder module
  *
@@ -28,12 +28,12 @@
             obj[path] = fn.apply(null, args);
         }
     }
-    _registerModule(_modules, 'modules/cylinder.src.js', [_modules['parts/Globals.js']], function (H) {
+    _registerModule(_modules, 'Series/CylinderSeries.js', [_modules['Core/Color/Color.js'], _modules['Core/Globals.js'], _modules['Extensions/Math3D.js'], _modules['Core/Series/Series.js'], _modules['Core/Utilities.js']], function (Color, H, Math3D, Series, U) {
         /* *
          *
          *  Highcharts cylinder - a 3D series
          *
-         *  (c) 2010-2019 Highsoft AS
+         *  (c) 2010-2020 Highsoft AS
          *
          *  Author: Kacper Madej
          *
@@ -42,9 +42,19 @@
          *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
          *
          * */
-        var charts = H.charts, color = H.color, deg2rad = H.deg2rad, perspective = H.perspective, pick = H.pick, seriesType = H.seriesType, 
-        // Work on H.Renderer instead of H.SVGRenderer for VML support.
-        RendererProto = H.Renderer.prototype, cuboidPath = RendererProto.cuboidPath, cylinderMethods;
+        var color = Color.parse;
+        var charts = H.charts,
+            deg2rad = H.deg2rad,
+            RendererProto = H.Renderer.prototype;
+        var perspective = Math3D.perspective;
+        var merge = U.merge,
+            pick = U.pick;
+        var cuboidPath = RendererProto.cuboidPath;
+        // Check if a path is simplified. The simplified path contains only lineTo
+        // segments, whereas non-simplified contain curves.
+        var isSimplified = function (path) {
+                return !path.some(function (seg) { return seg[0] === 'C'; });
+        };
         /**
           * The cylinder series type.
           *
@@ -57,7 +67,7 @@
           *
           * @augments Highcharts.Series
           */
-        seriesType('cylinder', 'column', 
+        Series.seriesType('cylinder', 'column', 
         /**
          * A cylinder graph is a variation of a 3d column graph. The cylinder graph
          * features cylindrical points.
@@ -69,13 +79,18 @@
          * @since        7.0.0
          * @product      highcharts
          * @excluding    allAreas, boostThreshold, colorAxis, compare, compareBase,
-         *               dragDrop
+         *               dragDrop, boostBlending
+         * @requires     modules/cylinder
          * @optionparent plotOptions.cylinder
          */
         {}, {}, 
         /** @lends Highcharts.seriesTypes.cylinder#pointClass# */
         {
-            shapeType: 'cylinder'
+            shapeType: 'cylinder',
+            hasNewShapeType: H
+                .seriesTypes.column.prototype
+                .pointClass.prototype
+                .hasNewShapeType
         });
         /**
          * A `cylinder` series. If the [type](#series.cylinder.type) option is not
@@ -84,7 +99,9 @@
          * @extends   series,plotOptions.cylinder
          * @since     7.0.0
          * @product   highcharts
-         * @excluding allAreas, boostThreshold, colorAxis, compare, compareBase
+         * @excluding allAreas, boostThreshold, colorAxis, compare, compareBase,
+         *            boostBlending
+         * @requires  modules/cylinder
          * @apioption series.cylinder
          */
         /**
@@ -148,16 +165,16 @@
          * @apioption series.cylinder.data
          */
         // cylinder extends cuboid
-        cylinderMethods = H.merge(RendererProto.elements3d.cuboid, {
-            parts: ['top', 'bottom', 'front', 'back'],
-            pathType: 'cylinder',
-            fillSetter: function (fill) {
-                this.singleSetterForParts('fill', null, {
-                    front: fill,
-                    back: fill,
-                    top: color(fill).brighten(0.1).get(),
-                    bottom: color(fill).brighten(-0.1).get()
-                });
+        var cylinderMethods = merge(RendererProto.elements3d.cuboid, {
+                parts: ['top', 'bottom', 'front', 'back'],
+                pathType: 'cylinder',
+                fillSetter: function (fill) {
+                    this.singleSetterForParts('fill', null, {
+                        front: fill,
+                        back: fill,
+                        top: color(fill).brighten(0.1).get(),
+                        bottom: color(fill).brighten(-0.1).get()
+                    });
                 // fill for animation getter (#6776)
                 this.color = this.fill = fill;
                 return this;
@@ -169,9 +186,18 @@
         };
         // Generates paths and zIndexes.
         RendererProto.cylinderPath = function (shapeArgs) {
-            var renderer = this, chart = charts[renderer.chartIndex], 
-            // decide zIndexes of parts based on cubiod logic, for consistency.
-            cuboidData = cuboidPath.call(renderer, shapeArgs), isTopFirst = !cuboidData.isTop, isFronFirst = !cuboidData.isFront, top = renderer.getCylinderEnd(chart, shapeArgs), bottom = renderer.getCylinderEnd(chart, shapeArgs, true);
+            var renderer = this,
+                chart = charts[renderer.chartIndex], 
+                // decide zIndexes of parts based on cubiod logic, for consistency.
+                cuboidData = cuboidPath.call(renderer,
+                shapeArgs),
+                isTopFirst = !cuboidData.isTop,
+                isFronFirst = !cuboidData.isFront,
+                top = renderer.getCylinderEnd(chart,
+                shapeArgs),
+                bottom = renderer.getCylinderEnd(chart,
+                shapeArgs,
+                true);
             return {
                 front: renderer.getCylinderFront(top, bottom),
                 back: renderer.getCylinderBack(top, bottom),
@@ -188,113 +214,146 @@
         };
         // Returns cylinder Front path
         RendererProto.getCylinderFront = function (topPath, bottomPath) {
-            var path = topPath.slice(0, topPath.simplified ? 9 : 17);
-            path.push('L');
-            if (bottomPath.simplified) {
-                path = path
-                    .concat(bottomPath.slice(7, 9))
-                    .concat(bottomPath.slice(3, 6))
-                    .concat(bottomPath.slice(0, 3));
-                // change 'M' into 'L'
-                path[path.length - 3] = 'L';
+            var path = topPath.slice(0, 3);
+            if (isSimplified(bottomPath)) {
+                var move = bottomPath[0];
+                if (move[0] === 'M') {
+                    path.push(bottomPath[2]);
+                    path.push(bottomPath[1]);
+                    path.push(['L', move[1], move[2]]);
+                }
             }
             else {
-                path.push(bottomPath[15], bottomPath[16], 'C', bottomPath[13], bottomPath[14], bottomPath[11], bottomPath[12], bottomPath[8], bottomPath[9], 'C', bottomPath[6], bottomPath[7], bottomPath[4], bottomPath[5], bottomPath[1], bottomPath[2]);
+                var move = bottomPath[0],
+                    curve1 = bottomPath[1],
+                    curve2 = bottomPath[2];
+                if (move[0] === 'M' && curve1[0] === 'C' && curve2[0] === 'C') {
+                    path.push(['L', curve2[5], curve2[6]]);
+                    path.push(['C', curve2[3], curve2[4], curve2[1], curve2[2], curve1[5], curve1[6]]);
+                    path.push(['C', curve1[3], curve1[4], curve1[1], curve1[2], move[1], move[2]]);
+                }
             }
-            path.push('Z');
+            path.push(['Z']);
             return path;
         };
         // Returns cylinder Back path
         RendererProto.getCylinderBack = function (topPath, bottomPath) {
-            var path = ['M'];
-            if (topPath.simplified) {
-                path = path.concat(topPath.slice(7, 12));
-                // end at start
-                path.push('L', topPath[1], topPath[2]);
+            var path = [];
+            if (isSimplified(topPath)) {
+                var move = topPath[0],
+                    line2 = topPath[2];
+                if (move[0] === 'M' && line2[0] === 'L') {
+                    path.push(['M', line2[1], line2[2]]);
+                    path.push(topPath[3]);
+                    // End at start
+                    path.push(['L', move[1], move[2]]);
+                }
             }
             else {
-                path = path.concat(topPath.slice(15));
+                if (topPath[2][0] === 'C') {
+                    path.push(['M', topPath[2][5], topPath[2][6]]);
+                }
+                path.push(topPath[3], topPath[4]);
             }
-            path.push('L');
-            if (bottomPath.simplified) {
-                path = path
-                    .concat(bottomPath.slice(1, 3))
-                    .concat(bottomPath.slice(9, 12))
-                    .concat(bottomPath.slice(6, 9));
+            if (isSimplified(bottomPath)) {
+                var move = bottomPath[0];
+                if (move[0] === 'M') {
+                    path.push(['L', move[1], move[2]]);
+                    path.push(bottomPath[3]);
+                    path.push(bottomPath[2]);
+                }
             }
             else {
-                path.push(bottomPath[29], bottomPath[30], 'C', bottomPath[27], bottomPath[28], bottomPath[25], bottomPath[26], bottomPath[22], bottomPath[23], 'C', bottomPath[20], bottomPath[21], bottomPath[18], bottomPath[19], bottomPath[15], bottomPath[16]);
+                var curve2 = bottomPath[2],
+                    curve3 = bottomPath[3],
+                    curve4 = bottomPath[4];
+                if (curve2[0] === 'C' && curve3[0] === 'C' && curve4[0] === 'C') {
+                    path.push(['L', curve4[5], curve4[6]]);
+                    path.push(['C', curve4[3], curve4[4], curve4[1], curve4[2], curve3[5], curve3[6]]);
+                    path.push(['C', curve3[3], curve3[4], curve3[1], curve3[2], curve2[5], curve2[6]]);
+                }
             }
-            path.push('Z');
+            path.push(['Z']);
             return path;
         };
         // Retruns cylinder path for top or bottom
         RendererProto.getCylinderEnd = function (chart, shapeArgs, isBottom) {
             // A half of the smaller one out of width or depth (optional, because
             // there's no depth for a funnel that reuses the code)
-            var depth = pick(shapeArgs.depth, shapeArgs.width), radius = Math.min(shapeArgs.width, depth) / 2, 
-            // Approximated longest diameter
-            angleOffset = deg2rad * (chart.options.chart.options3d.beta - 90 +
-                (shapeArgs.alphaCorrection || 0)), 
-            // Could be top or bottom of the cylinder
-            y = shapeArgs.y + (isBottom ? shapeArgs.height : 0), 
-            // Use cubic Bezier curve to draw a cricle in x,z (y is constant).
-            // More math. at spencermortensen.com/articles/bezier-circle/
-            c = 0.5519 * radius, centerX = shapeArgs.width / 2 + shapeArgs.x, centerZ = depth / 2 + shapeArgs.z, 
-            // points could be generated in a loop, but readability will plummet
-            points = [{
-                    x: 0,
-                    y: y,
-                    z: radius
-                }, {
-                    x: c,
-                    y: y,
-                    z: radius
-                }, {
-                    x: radius,
-                    y: y,
-                    z: c
-                }, {
-                    x: radius,
-                    y: y,
-                    z: 0
-                }, {
-                    x: radius,
-                    y: y,
-                    z: -c
-                }, {
-                    x: c,
-                    y: y,
-                    z: -radius
-                }, {
-                    x: 0,
-                    y: y,
-                    z: -radius
-                }, {
-                    x: -c,
-                    y: y,
-                    z: -radius
-                }, {
-                    x: -radius,
-                    y: y,
-                    z: -c
-                }, {
-                    x: -radius,
-                    y: y,
-                    z: 0
-                }, {
-                    x: -radius,
-                    y: y,
-                    z: c
-                }, {
-                    x: -c,
-                    y: y,
-                    z: radius
-                }, {
-                    x: 0,
-                    y: y,
-                    z: radius
-                }], cosTheta = Math.cos(angleOffset), sinTheta = Math.sin(angleOffset), perspectivePoints, path, x, z;
+            var depth = pick(shapeArgs.depth,
+                shapeArgs.width),
+                radius = Math.min(shapeArgs.width,
+                depth) / 2, 
+                // Approximated longest diameter
+                angleOffset = deg2rad * (chart.options.chart.options3d.beta - 90 +
+                    (shapeArgs.alphaCorrection || 0)), 
+                // Could be top or bottom of the cylinder
+                y = shapeArgs.y + (isBottom ? shapeArgs.height : 0), 
+                // Use cubic Bezier curve to draw a cricle in x,z (y is constant).
+                // More math. at spencermortensen.com/articles/bezier-circle/
+                c = 0.5519 * radius,
+                centerX = shapeArgs.width / 2 + shapeArgs.x,
+                centerZ = depth / 2 + shapeArgs.z, 
+                // points could be generated in a loop, but readability will plummet
+                points = [{
+                        x: 0,
+                        y: y,
+                        z: radius
+                    }, {
+                        x: c,
+                        y: y,
+                        z: radius
+                    }, {
+                        x: radius,
+                        y: y,
+                        z: c
+                    }, {
+                        x: radius,
+                        y: y,
+                        z: 0
+                    }, {
+                        x: radius,
+                        y: y,
+                        z: -c
+                    }, {
+                        x: c,
+                        y: y,
+                        z: -radius
+                    }, {
+                        x: 0,
+                        y: y,
+                        z: -radius
+                    }, {
+                        x: -c,
+                        y: y,
+                        z: -radius
+                    }, {
+                        x: -radius,
+                        y: y,
+                        z: -c
+                    }, {
+                        x: -radius,
+                        y: y,
+                        z: 0
+                    }, {
+                        x: -radius,
+                        y: y,
+                        z: c
+                    }, {
+                        x: -c,
+                        y: y,
+                        z: radius
+                    }, {
+                        x: 0,
+                        y: y,
+                        z: radius
+                    }],
+                cosTheta = Math.cos(angleOffset),
+                sinTheta = Math.sin(angleOffset),
+                perspectivePoints,
+                path,
+                x,
+                z;
             // rotete to match chart's beta and translate to the shape center
             points.forEach(function (point, i) {
                 x = point.x;
@@ -315,7 +374,6 @@
                     perspectivePoints[6],
                     perspectivePoints[9]
                 ], true);
-                path.simplified = true;
             }
             else {
                 // or default curved path to imitate ellipse (2D circle)
@@ -327,12 +385,18 @@
         // [ M, x, y, ...[C, cp1x, cp2y, cp2x, cp2y, epx, epy]*n_times ]
         // (cp - control point, ep - end point)
         RendererProto.getCurvedPath = function (points) {
-            var path = [
-                'M',
-                points[0].x, points[0].y
-            ], limit = points.length - 2, i;
+            var path = [['M',
+                points[0].x,
+                points[0].y]],
+                limit = points.length - 2,
+                i;
             for (i = 1; i < limit; i += 3) {
-                path.push('C', points[i].x, points[i].y, points[i + 1].x, points[i + 1].y, points[i + 2].x, points[i + 2].y);
+                path.push([
+                    'C',
+                    points[i].x, points[i].y,
+                    points[i + 1].x, points[i + 1].y,
+                    points[i + 2].x, points[i + 2].y
+                ]);
             }
             return path;
         };

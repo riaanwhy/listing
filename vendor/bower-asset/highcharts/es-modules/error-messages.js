@@ -11,7 +11,7 @@
 
 'use strict';
 
-import H from './parts/Globals.js';
+import H from './Core/Globals.js';
 
 H.errorMessages = {
     "10": {
@@ -25,7 +25,7 @@ H.errorMessages = {
     },
     "12": {
         "title": "Highcharts expects point configuration to be numbers or arrays in turbo mode",
-        "text": "<h1>Highcharts expects point configuration to be numbers or arrays in turbo mode</h1><p>This error occurs if the series.data option contains object configurations and the number of points exceeds the turboThreshold. It can be fixed by either setting <code>turboThreshold</code> to a higher value, or changing the point configurations to numbers or arrays.</p><p>See <a href=\"https://api.highcharts.com/highcharts#plotOptions.series.turboThreshold\">plotOptions.series.turboThreshold</a></p>"
+        "text": "<h1>Highcharts expects point configuration to be numbers or arrays in turbo mode</h1><p>This error occurs if the <code>series.data</code> option contains object configurations and the number of points exceeds the turboThreshold. It can be fixed by either setting <code>turboThreshold</code> to a higher value, or changing the point configurations to numbers or arrays.</p><p>In boost mode, turbo mode is always on, which means only array of numbers or two dimensional arrays are allowed.</p><p>See <a href=\"https://api.highcharts.com/highcharts#plotOptions.series.turboThreshold\">plotOptions.series.turboThreshold</a></p>"
     },
     "13": {
         "title": "Rendering div not found",
@@ -103,6 +103,10 @@ H.errorMessages = {
         "title": "Non-unique point or node id",
         "text": "<h1>Non-unique point or node id</h1><p>This error occurs when using the same <code>id</code> for two or more points or nodes.</p>"
     },
+    "32": {
+        "title": "Deprecated function or property",
+        "text": "<h1>Deprecated function or property</h1><p>This error occurs when using a deprecated function or property. Consult the <a href=\"https://api.highcharts.com/\">API documentation</a> for alternatives, if no replacement is mentioned by the error itself.</p>"
+    },
     "meta": {
         "files": [
             "errors/10/readme.md",
@@ -127,7 +131,8 @@ H.errorMessages = {
             "errors/28/readme.md",
             "errors/29/readme.md",
             "errors/30/readme.md",
-            "errors/31/readme.md"
+            "errors/31/readme.md",
+            "errors/32/readme.md"
         ]
     }
 };

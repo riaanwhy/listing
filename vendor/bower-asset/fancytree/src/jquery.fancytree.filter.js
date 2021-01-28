@@ -4,7 +4,7 @@
  * Remove or highlight tree nodes, based on a filter.
  * (Extension module for jquery.fancytree.js: https://github.com/mar10/fancytree/)
  *
- * Copyright (c) 2008-2019, Martin Wendt (https://wwWendt.de)
+ * Copyright (c) 2008-2020, Martin Wendt (https://wwWendt.de)
  *
  * Released under the MIT license
  * https://github.com/mar10/fancytree/wiki/LicenseInfo
@@ -174,7 +174,9 @@
 				count++;
 				node.match = true;
 				node.visitParents(function(p) {
-					p.subMatchCount += 1;
+					if (p !== node) {
+						p.subMatchCount += 1;
+					}
 					// Expand match (unless this is no real match, but only a node in a matched branch)
 					if (opts.autoExpand && !matchedByBranch && !p.expanded) {
 						p.setExpanded(true, {

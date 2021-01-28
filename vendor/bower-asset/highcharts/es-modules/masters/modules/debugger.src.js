@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v7.2.0 (2019-09-03)
+ * @license Highcharts JS v8.2.2 (2020-10-22)
  * @module highcharts/modules/debugger
  * @requires highcharts
  *
@@ -13,4 +13,4 @@
 'use strict';
 
 import '../../error-messages.js';
-import '../../modules/debugger.src.js';
+import '../../Extensions/Debugger.js';

@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v7.2.0 (2019-09-03)
+ * @license Highcharts JS v8.2.2 (2020-10-22)
  *
  * Dependency wheel module
  *
@@ -28,17 +28,20 @@
             obj[path] = fn.apply(null, args);
         }
     }
-    _registerModule(_modules, 'modules/dependency-wheel.src.js', [_modules['parts/Globals.js']], function (H) {
+    _registerModule(_modules, 'Series/DependencyWheelSeries.js', [_modules['Core/Animation/AnimationUtilities.js'], _modules['Core/Series/Series.js'], _modules['Core/Globals.js'], _modules['Mixins/Nodes.js']], function (A, BaseSeries, H, NodesMixin) {
         /* *
          *
          *  Dependency wheel module
          *
-         *  (c) 2018-2019 Torstein Honsi
+         *  (c) 2018-2020 Torstein Honsi
          *
          *  License: www.highcharts.com/license
          *
+         *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
+         *
          * */
-        var base = H.seriesTypes.sankey.prototype;
+        var animObject = A.animObject;
+        var base = BaseSeries.seriesTypes.sankey.prototype;
         /**
          * @private
          * @class
@@ -46,7 +49,7 @@
          *
          * @augments Highcharts.seriesTypes.sankey
          */
-        H.seriesType('dependencywheel', 'sankey', 
+        BaseSeries.seriesType('dependencywheel', 'sankey', 
         /**
          * A dependency wheel chart is a type of flow diagram, where all nodes are
          * laid out in a circle, and the flow between the are drawn as link bands.
@@ -55,8 +58,10 @@
          *         Dependency wheel
          *
          * @extends      plotOptions.sankey
+         * @exclude      dataSorting
          * @since        7.1.0
          * @product      highcharts
+         * @requires     modules/dependency-wheel
          * @optionparent plotOptions.dependencywheel
          */
         {
@@ -77,7 +82,7 @@
             startAngle: 0
         }, {
             orderNodes: false,
-            getCenter: H.seriesTypes.pie.prototype.getCenter,
+            getCenter: BaseSeries.seriesTypes.pie.prototype.getCenter,
             /* eslint-disable valid-jsdoc */
             /**
              * Dependency wheel has only one column, it runs along the perimeter.
@@ -99,7 +104,8 @@
                 return this.options.nodePadding / Math.PI;
             },
             createNode: function (id) {
-                var node = base.createNode.call(this, id);
+                var node = base.createNode.call(this,
+                    id);
                 node.index = this.nodes.length - 1;
                 /**
                  * Return the sum of incoming and outgoing links.
@@ -117,7 +123,10 @@
                  * @private
                  */
                 node.offset = function (point) {
-                    var offset = 0, i, links = node.linksFrom.concat(node.linksTo), sliced;
+                    var offset = 0,
+                        i,
+                        links = node.linksFrom.concat(node.linksTo),
+                        sliced;
                     /**
                      * @private
                      */
@@ -157,85 +166,108 @@
              * functions instead of the whole translate function.
              */
             translate: function () {
-                var options = this.options, factor = 2 * Math.PI /
-                    (this.chart.plotHeight + this.getNodePadding()), center = this.getCenter(), startAngle = (options.startAngle - 90) * H.deg2rad;
+                var options = this.options,
+                    factor = 2 * Math.PI /
+                        (this.chart.plotHeight + this.getNodePadding()),
+                    center = this.getCenter(),
+                    startAngle = (options.startAngle - 90) * H.deg2rad;
                 base.translate.call(this);
                 this.nodeColumns[0].forEach(function (node) {
-                    var shapeArgs = node.shapeArgs, centerX = center[0], centerY = center[1], r = center[2] / 2, innerR = r - options.nodeWidth, start = startAngle + factor * shapeArgs.y, end = startAngle +
-                        factor * (shapeArgs.y + shapeArgs.height);
-                    // Middle angle
-                    node.angle = start + (end - start) / 2;
-                    node.shapeType = 'arc';
-                    node.shapeArgs = {
-                        x: centerX,
-                        y: centerY,
-                        r: r,
-                        innerR: innerR,
-                        start: start,
-                        end: end
-                    };
-                    node.dlBox = {
-                        x: centerX + Math.cos((start + end) / 2) * (r + innerR) / 2,
-                        y: centerY + Math.sin((start + end) / 2) * (r + innerR) / 2,
-                        width: 1,
-                        height: 1
-                    };
-                    // Draw the links from this node
-                    node.linksFrom.forEach(function (point) {
-                        var distance;
-                        var corners = point.linkBase.map(function (top, i) {
-                            var angle = factor * top, x = Math.cos(startAngle + angle) * (innerR + 1), y = Math.sin(startAngle + angle) * (innerR + 1), curveFactor = options.curveFactor;
-                            // The distance between the from and to node along the
-                            // perimeter. This affect how curved the link is, so
-                            // that links between neighbours don't extend too far
-                            // towards the center.
-                            distance = Math.abs(point.linkBase[3 - i] * factor - angle);
-                            if (distance > Math.PI) {
-                                distance = 2 * Math.PI - distance;
-                            }
-                            distance = distance * innerR;
-                            if (distance < innerR) {
-                                curveFactor *= (distance / innerR);
-                            }
-                            return {
-                                x: centerX + x,
-                                y: centerY + y,
-                                cpX: centerX + (1 - curveFactor) * x,
-                                cpY: centerY + (1 - curveFactor) * y
-                            };
-                        });
-                        point.shapeArgs = {
-                            d: [
-                                'M',
-                                corners[0].x, corners[0].y,
-                                'A',
-                                innerR, innerR,
-                                0,
-                                0,
-                                1,
-                                corners[1].x, corners[1].y,
-                                'C',
-                                corners[1].cpX, corners[1].cpY,
-                                corners[2].cpX, corners[2].cpY,
-                                corners[2].x, corners[2].y,
-                                'A',
-                                innerR, innerR,
-                                0,
-                                0,
-                                1,
-                                corners[3].x, corners[3].y,
-                                'C',
-                                corners[3].cpX, corners[3].cpY,
-                                corners[0].cpX, corners[0].cpY,
-                                corners[0].x, corners[0].y
-                            ]
+                    // Don't render the nodes if sum is 0 #12453
+                    if (node.sum) {
+                        var shapeArgs = node.shapeArgs,
+                            centerX = center[0],
+                            centerY = center[1],
+                            r = center[2] / 2,
+                            innerR = r - options.nodeWidth,
+                            start = startAngle + factor * shapeArgs.y,
+                            end = startAngle +
+                                factor * (shapeArgs.y + shapeArgs.height);
+                        // Middle angle
+                        node.angle = start + (end - start) / 2;
+                        node.shapeType = 'arc';
+                        node.shapeArgs = {
+                            x: centerX,
+                            y: centerY,
+                            r: r,
+                            innerR: innerR,
+                            start: start,
+                            end: end
                         };
-                    });
+                        node.dlBox = {
+                            x: centerX + Math.cos((start + end) / 2) * (r + innerR) / 2,
+                            y: centerY + Math.sin((start + end) / 2) * (r + innerR) / 2,
+                            width: 1,
+                            height: 1
+                        };
+                        // Draw the links from this node
+                        node.linksFrom.forEach(function (point) {
+                            if (point.linkBase) {
+                                var distance;
+                                var corners = point.linkBase.map(function (top,
+                                    i) {
+                                        var angle = factor * top,
+                                    x = Math.cos(startAngle + angle) * (innerR + 1),
+                                    y = Math.sin(startAngle + angle) * (innerR + 1),
+                                    curveFactor = options.curveFactor;
+                                    // The distance between the from and to node
+                                    // along the perimeter. This affect how curved
+                                    // the link is, so that links between neighbours
+                                    // don't extend too far towards the center.
+                                    distance = Math.abs(point.linkBase[3 - i] * factor - angle);
+                                    if (distance > Math.PI) {
+                                        distance = 2 * Math.PI - distance;
+                                    }
+                                    distance = distance * innerR;
+                                    if (distance < innerR) {
+                                        curveFactor *= (distance / innerR);
+                                    }
+                                    return {
+                                        x: centerX + x,
+                                        y: centerY + y,
+                                        cpX: centerX + (1 - curveFactor) * x,
+                                        cpY: centerY + (1 - curveFactor) * y
+                                    };
+                                });
+                                point.shapeArgs = {
+                                    d: [[
+                                            'M',
+                                            corners[0].x, corners[0].y
+                                        ], [
+                                            'A',
+                                            innerR, innerR,
+                                            0,
+                                            0,
+                                            1,
+                                            corners[1].x, corners[1].y
+                                        ], [
+                                            'C',
+                                            corners[1].cpX, corners[1].cpY,
+                                            corners[2].cpX, corners[2].cpY,
+                                            corners[2].x, corners[2].y
+                                        ], [
+                                            'A',
+                                            innerR, innerR,
+                                            0,
+                                            0,
+                                            1,
+                                            corners[3].x, corners[3].y
+                                        ], [
+                                            'C',
+                                            corners[3].cpX, corners[3].cpY,
+                                            corners[0].cpX, corners[0].cpY,
+                                            corners[0].x, corners[0].y
+                                        ]]
+                                };
+                            }
+                        });
+                    }
                 });
             },
             animate: function (init) {
                 if (!init) {
-                    var duration = H.animObject(this.options.animation).duration, step = (duration / 2) / this.nodes.length;
+                    var duration = animObject(this.options.animation).duration,
+                        step = (duration / 2) / this.nodes.length;
                     this.nodes.forEach(function (point, i) {
                         var graphic = point.graphic;
                         if (graphic) {
@@ -254,21 +286,24 @@
                             }, this.options.animation);
                         }
                     }, this);
-                    this.animate = null;
                 }
             }
             /* eslint-enable valid-jsdoc */
         }, 
         // Point class
         {
-            setState: H.NodesMixin.setNodeState,
+            setState: NodesMixin.setNodeState,
             /* eslint-disable valid-jsdoc */
             /**
              * Return a text path that the data label uses.
              * @private
              */
             getDataLabelPath: function (label) {
-                var renderer = this.series.chart.renderer, shapeArgs = this.shapeArgs, upperHalf = this.angle < 0 || this.angle > Math.PI, start = shapeArgs.start, end = shapeArgs.end;
+                var renderer = this.series.chart.renderer,
+                    shapeArgs = this.shapeArgs,
+                    upperHalf = this.angle < 0 || this.angle > Math.PI,
+                    start = shapeArgs.start,
+                    end = shapeArgs.end;
                 if (!this.dataLabelPath) {
                     this.dataLabelPath = renderer
                         .arc({ open: true })
@@ -298,7 +333,10 @@
          * option is not specified, it is inherited from [chart.type](#chart.type).
          *
          * @extends   series,plotOptions.dependencywheel
+         * @exclude   dataSorting
          * @product   highcharts
+         * @requires  modules/sankey
+         * @requires  modules/dependency-wheel
          * @apioption series.dependencywheel
          */
         /**

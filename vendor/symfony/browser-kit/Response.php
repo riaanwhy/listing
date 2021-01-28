@@ -12,20 +12,19 @@
 namespace Symfony\Component\BrowserKit;
 
 /**
- * @author Fabien Potencier <fabien@symfony.com>
+ * Response object.
  *
- * @final since Symfony 4.3
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class Response
 {
-    /** @internal */
     protected $content;
-    /** @internal */
     protected $status;
-    /** @internal */
     protected $headers;
 
     /**
+     * Constructor.
+     *
      * The headers array is a set of key/value pairs. If a header is present multiple times
      * then the value is an array of all the values.
      *
@@ -33,7 +32,7 @@ class Response
      * @param int    $status  The response status code
      * @param array  $headers An array of headers
      */
-    public function __construct(string $content = '', int $status = 200, array $headers = [])
+    public function __construct($content = '', $status = 200, array $headers = array())
     {
         $this->content = $content;
         $this->status = $status;
@@ -49,11 +48,11 @@ class Response
     {
         $headers = '';
         foreach ($this->headers as $name => $value) {
-            if (\is_string($value)) {
-                $headers .= sprintf("%s: %s\n", $name, $value);
+            if (is_string($value)) {
+                $headers .= $this->buildHeader($name, $value);
             } else {
                 foreach ($value as $headerValue) {
-                    $headers .= sprintf("%s: %s\n", $name, $headerValue);
+                    $headers .= $this->buildHeader($name, $headerValue);
                 }
             }
         }
@@ -68,13 +67,9 @@ class Response
      * @param string $value The header value
      *
      * @return string The built header line
-     *
-     * @deprecated since Symfony 4.3
      */
     protected function buildHeader($name, $value)
     {
-        @trigger_error(sprintf('The "%s()" method is deprecated since Symfony 4.3.', __METHOD__), E_USER_DEPRECATED);
-
         return sprintf("%s: %s\n", $name, $value);
     }
 
@@ -92,17 +87,8 @@ class Response
      * Gets the response status code.
      *
      * @return int The response status code
-     *
-     * @deprecated since Symfony 4.3, use getStatusCode() instead
      */
     public function getStatus()
-    {
-        @trigger_error(sprintf('The "%s()" method is deprecated since Symfony 4.3, use getStatusCode() instead.', __METHOD__), E_USER_DEPRECATED);
-
-        return $this->status;
-    }
-
-    public function getStatusCode(): int
     {
         return $this->status;
     }
@@ -131,13 +117,13 @@ class Response
         foreach ($this->headers as $key => $value) {
             if (str_replace('-', '_', strtolower($key)) === $normalizedHeader) {
                 if ($first) {
-                    return \is_array($value) ? (\count($value) ? $value[0] : '') : $value;
+                    return is_array($value) ? (count($value) ? $value[0] : '') : $value;
                 }
 
-                return \is_array($value) ? $value : [$value];
+                return is_array($value) ? $value : array($value);
             }
         }
 
-        return $first ? null : [];
+        return $first ? null : array();
     }
 }

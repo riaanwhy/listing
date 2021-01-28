@@ -3,11 +3,12 @@
  *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
  *
  * */
-import H from '../parts/Globals.js';
-import U from '../parts/Utilities.js';
-var defined = U.defined;
-var pick = H.pick, Point = H.Point;
-H.NodesMixin = {
+import H from '../Core/Globals.js';
+import Point from '../Core/Series/Point.js';
+import U from '../Core/Utilities.js';
+var defined = U.defined, extend = U.extend, find = U.find, pick = U.pick;
+import '../Series/LineSeries.js';
+var NodesMixin = H.NodesMixin = {
     /* eslint-disable valid-jsdoc */
     /**
      * Create a single node that holds information on incoming and outgoing
@@ -19,14 +20,14 @@ H.NodesMixin = {
          * @private
          */
         function findById(nodes, id) {
-            return H.find(nodes, function (node) {
+            return find(nodes, function (node) {
                 return node.id === id;
             });
         }
         var node = findById(this.nodes, id), PointClass = this.pointClass, options;
         if (!node) {
             options = this.options.nodes && findById(this.options.nodes, id);
-            node = (new PointClass()).init(this, H.extend({
+            node = (new PointClass()).init(this, extend({
                 className: 'highcharts-node',
                 isNode: true,
                 id: id,
@@ -35,7 +36,7 @@ H.NodesMixin = {
             node.linksTo = [];
             node.linksFrom = [];
             node.formatPrefix = 'node';
-            node.name = node.name || node.options.id; // for use in formats
+            node.name = node.name || node.options.id || ''; // for use in formats
             // Mass is used in networkgraph:
             node.mass = pick(
             // Node:
@@ -102,7 +103,7 @@ H.NodesMixin = {
         this.nodes.forEach(function (node) {
             node.linksFrom.length = 0;
             node.linksTo.length = 0;
-            node.level = undefined;
+            node.level = node.options.level;
         });
         // Create the node list and set up links
         this.points.forEach(function (point) {
@@ -159,13 +160,13 @@ H.NodesMixin = {
             [this.fromNode, this.toNode];
         if (state !== 'select') {
             others.forEach(function (linkOrNode) {
-                if (linkOrNode.series) {
+                if (linkOrNode && linkOrNode.series) {
                     Point.prototype.setState.apply(linkOrNode, args);
                     if (!linkOrNode.isNode) {
                         if (linkOrNode.fromNode.graphic) {
                             Point.prototype.setState.apply(linkOrNode.fromNode, args);
                         }
-                        if (linkOrNode.toNode.graphic) {
+                        if (linkOrNode.toNode && linkOrNode.toNode.graphic) {
                             Point.prototype.setState.apply(linkOrNode.toNode, args);
                         }
                     }
@@ -176,3 +177,4 @@ H.NodesMixin = {
     }
     /* eslint-enable valid-jsdoc */
 };
+export default NodesMixin;

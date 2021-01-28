@@ -4,7 +4,7 @@
  * Miscellaneous debug extensions.
  * (Extension module for jquery.fancytree.js: https://github.com/mar10/fancytree/)
  *
- * Copyright (c) 2008-2019, Martin Wendt (https://wwWendt.de)
+ * Copyright (c) 2008-2020, Martin Wendt (https://wwWendt.de)
  *
  * Released under the MIT license
  * https://github.com/mar10/fancytree/wiki/LicenseInfo
@@ -36,7 +36,7 @@
 		PREFIX = "ft-logger: ",
 		logLine = window.console.log,
 		// HOOK_NAMES = "nodeClick nodeCollapseSiblings".split(" "),
-		TREE_EVENT_NAMES = "beforeRestore beforeUpdateViewport blurTree create init focusTree restore updateViewport".split(
+		TREE_EVENT_NAMES = "beforeRestore beforeUpdateViewport blurTree create init focusTree preInit restore updateViewport".split(
 			" "
 		),
 		NODE_EVENT_NAMES = "activate activateCell beforeActivate beforeExpand beforeSelect blur click collapse createNode dblclick deactivate defaultGridAction expand enhanceTitle focus keydown keypress lazyLoad loadChildren loadError modifyChild postProcess renderNode renderTitle select".split(

@@ -1,5 +1,5 @@
 /**
- * @license Highstock JS v7.2.0 (2019-09-03)
+ * @license Highstock JS v8.2.2 (2020-10-22)
  *
  * Indicator series type for Highstock
  *
@@ -28,18 +28,20 @@
             obj[path] = fn.apply(null, args);
         }
     }
-    _registerModule(_modules, 'mixins/multipe-lines.js', [_modules['parts/Globals.js'], _modules['parts/Utilities.js']], function (H, U) {
+    _registerModule(_modules, 'Mixins/MultipleLines.js', [_modules['Core/Globals.js'], _modules['Core/Utilities.js']], function (H, U) {
         /**
          *
-         *  (c) 2010-2019 Wojciech Chmiel
+         *  (c) 2010-2020 Wojciech Chmiel
          *
          *  License: www.highcharts.com/license
          *
          *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
          *
          * */
-        var defined = U.defined;
-        var each = H.each, merge = H.merge, error = H.error, SMA = H.seriesTypes.sma;
+        var defined = U.defined,
+            error = U.error,
+            merge = U.merge;
+        var SMA = H.seriesTypes.sma;
         /**
          * Mixin useful for all indicators that have more than one line.
          * Merge it with your implementation where you will provide
@@ -51,51 +53,51 @@
          * @mixin multipleLinesMixin
          */
         var multipleLinesMixin = {
-            /* eslint-disable valid-jsdoc */
-            /**
-             * Lines ids. Required to plot appropriate amount of lines.
-             * Notice that pointArrayMap should have more elements than
-             * linesApiNames, because it contains main line and additional lines ids.
-             * Also it should be consistent with amount of lines calculated in
-             * getValues method from your implementation.
-             *
-             * @private
-             * @name multipleLinesMixin.pointArrayMap
-             * @type {Array<string>}
-             */
-            pointArrayMap: ['top', 'bottom'],
-            /**
-             * Main line id.
-             *
-             * @private
-             * @name multipleLinesMixin.pointValKey
-             * @type {string}
-             */
-            pointValKey: 'top',
-            /**
-             * Additional lines DOCS names. Elements of linesApiNames array should
-             * be consistent with DOCS line names defined in your implementation.
-             * Notice that linesApiNames should have decreased amount of elements
-             * relative to pointArrayMap (without pointValKey).
-             *
-             * @private
-             * @name multipleLinesMixin.linesApiNames
-             * @type {Array<string>}
-             */
-            linesApiNames: ['bottomLine'],
-            /**
-             * Create translatedLines Collection based on pointArrayMap.
-             *
-             * @private
-             * @function multipleLinesMixin.getTranslatedLinesNames
-             * @param {string} [excludedValue]
-             *        Main line id
-             * @return {Array<string>}
-             *         Returns translated lines names without excluded value.
-             */
-            getTranslatedLinesNames: function (excludedValue) {
-                var translatedLines = [];
-                each(this.pointArrayMap, function (propertyName) {
+                /* eslint-disable valid-jsdoc */
+                /**
+                 * Lines ids. Required to plot appropriate amount of lines.
+                 * Notice that pointArrayMap should have more elements than
+                 * linesApiNames, because it contains main line and additional lines ids.
+                 * Also it should be consistent with amount of lines calculated in
+                 * getValues method from your implementation.
+                 *
+                 * @private
+                 * @name multipleLinesMixin.pointArrayMap
+                 * @type {Array<string>}
+                 */
+                pointArrayMap: ['top', 'bottom'],
+                /**
+                 * Main line id.
+                 *
+                 * @private
+                 * @name multipleLinesMixin.pointValKey
+                 * @type {string}
+                 */
+                pointValKey: 'top',
+                /**
+                 * Additional lines DOCS names. Elements of linesApiNames array should
+                 * be consistent with DOCS line names defined in your implementation.
+                 * Notice that linesApiNames should have decreased amount of elements
+                 * relative to pointArrayMap (without pointValKey).
+                 *
+                 * @private
+                 * @name multipleLinesMixin.linesApiNames
+                 * @type {Array<string>}
+                 */
+                linesApiNames: ['bottomLine'],
+                /**
+                 * Create translatedLines Collection based on pointArrayMap.
+                 *
+                 * @private
+                 * @function multipleLinesMixin.getTranslatedLinesNames
+                 * @param {string} [excludedValue]
+                 *        Main line id
+                 * @return {Array<string>}
+                 *         Returns translated lines names without excluded value.
+                 */
+                getTranslatedLinesNames: function (excludedValue) {
+                    var translatedLines = [];
+                (this.pointArrayMap || []).forEach(function (propertyName) {
                     if (propertyName !== excludedValue) {
                         translatedLines.push('plot' +
                             propertyName.charAt(0).toUpperCase() +
@@ -114,7 +116,7 @@
              */
             toYData: function (point) {
                 var pointColl = [];
-                each(this.pointArrayMap, function (propertyName) {
+                (this.pointArrayMap || []).forEach(function (propertyName) {
                     pointColl.push(point[propertyName]);
                 });
                 return pointColl;
@@ -127,11 +129,14 @@
              * @return {void}
              */
             translate: function () {
-                var indicator = this, pointArrayMap = indicator.pointArrayMap, LinesNames = [], value;
+                var indicator = this,
+                    pointArrayMap = indicator.pointArrayMap,
+                    LinesNames = [],
+                    value;
                 LinesNames = indicator.getTranslatedLinesNames();
                 SMA.prototype.translate.apply(indicator, arguments);
-                each(indicator.points, function (point) {
-                    each(pointArrayMap, function (propertyName, i) {
+                indicator.points.forEach(function (point) {
+                    pointArrayMap.forEach(function (propertyName, i) {
                         value = point[propertyName];
                         if (value !== null) {
                             point[LinesNames[i]] = indicator.yAxis.toPixels(value, true);
@@ -147,15 +152,24 @@
              * @return {void}
              */
             drawGraph: function () {
-                var indicator = this, pointValKey = indicator.pointValKey, linesApiNames = indicator.linesApiNames, mainLinePoints = indicator.points, pointsLength = mainLinePoints.length, mainLineOptions = indicator.options, mainLinePath = indicator.graph, gappedExtend = {
-                    options: {
-                        gapSize: mainLineOptions.gapSize
-                    }
-                }, 
-                // additional lines point place holders:
-                secondaryLines = [], secondaryLinesNames = indicator.getTranslatedLinesNames(pointValKey), point;
+                var indicator = this,
+                    pointValKey = indicator.pointValKey,
+                    linesApiNames = indicator.linesApiNames,
+                    mainLinePoints = indicator.points,
+                    pointsLength = mainLinePoints.length,
+                    mainLineOptions = indicator.options,
+                    mainLinePath = indicator.graph,
+                    gappedExtend = {
+                        options: {
+                            gapSize: mainLineOptions.gapSize
+                        }
+                    }, 
+                    // additional lines point place holders:
+                    secondaryLines = [],
+                    secondaryLinesNames = indicator.getTranslatedLinesNames(pointValKey),
+                    point;
                 // Generate points for additional lines:
-                each(secondaryLinesNames, function (plotLine, index) {
+                secondaryLinesNames.forEach(function (plotLine, index) {
                     // create additional lines point place holders
                     secondaryLines[index] = [];
                     while (pointsLength--) {
@@ -170,7 +184,7 @@
                     pointsLength = mainLinePoints.length;
                 });
                 // Modify options and generate additional lines:
-                each(linesApiNames, function (lineName, i) {
+                linesApiNames.forEach(function (lineName, i) {
                     if (secondaryLines[i]) {
                         indicator.points = secondaryLines[i];
                         if (mainLineOptions[lineName]) {
@@ -203,39 +217,44 @@
 
         return multipleLinesMixin;
     });
-    _registerModule(_modules, 'mixins/indicator-required.js', [_modules['parts/Globals.js']], function (H) {
+    _registerModule(_modules, 'Mixins/IndicatorRequired.js', [_modules['Core/Utilities.js']], function (U) {
         /**
          *
-         *  (c) 2010-2019 Daniel Studencki
+         *  (c) 2010-2020 Daniel Studencki
          *
          *  License: www.highcharts.com/license
          *
          *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
          *
          * */
-        var error = H.error;
+        var error = U.error;
         /* eslint-disable no-invalid-this, valid-jsdoc */
         var requiredIndicatorMixin = {
-            /**
-             * Check whether given indicator is loaded, else throw error.
-             * @private
-             * @param {Highcharts.Indicator} indicator
-             *        Indicator constructor function.
-             * @param {string} requiredIndicator
-             *        Required indicator type.
-             * @param {string} type
-             *        Type of indicator where function was called (parent).
-             * @param {Highcharts.IndicatorConstructorFunction} callback
-             *        Callback which is triggered if the given indicator is loaded.
-             *        Takes indicator as an argument.
-             * @param {string} errMessage
-             *        Error message that will be logged in console.
-             * @return {boolean}
-             *         Returns false when there is no required indicator loaded.
-             */
-            isParentLoaded: function (indicator, requiredIndicator, type, callback, errMessage) {
-                if (indicator) {
-                    return callback ? callback(indicator) : true;
+                /**
+                 * Check whether given indicator is loaded,
+            else throw error.
+                 * @private
+                 * @param {Highcharts.Indicator} indicator
+                 *        Indicator constructor function.
+                 * @param {string} requiredIndicator
+                 *        Required indicator type.
+                 * @param {string} type
+                 *        Type of indicator where function was called (parent).
+                 * @param {Highcharts.IndicatorCallbackFunction} callback
+                 *        Callback which is triggered if the given indicator is loaded.
+                 *        Takes indicator as an argument.
+                 * @param {string} errMessage
+                 *        Error message that will be logged in console.
+                 * @return {boolean}
+                 *         Returns false when there is no required indicator loaded.
+                 */
+                isParentLoaded: function (indicator,
+            requiredIndicator,
+            type,
+            callback,
+            errMessage) {
+                    if (indicator) {
+                        return callback ? callback(indicator) : true;
                 }
                 error(errMessage || this.generateMessage(type, requiredIndicator));
                 return false;
@@ -260,18 +279,17 @@
 
         return requiredIndicatorMixin;
     });
-    _registerModule(_modules, 'indicators/aroon-oscillator.src.js', [_modules['parts/Globals.js'], _modules['mixins/multipe-lines.js'], _modules['mixins/indicator-required.js']], function (H, multipleLinesMixin, requiredIndicatorMixin) {
+    _registerModule(_modules, 'Stock/Indicators/AroonOscillatorIndicator.js', [_modules['Core/Series/Series.js'], _modules['Mixins/MultipleLines.js'], _modules['Mixins/IndicatorRequired.js'], _modules['Core/Utilities.js']], function (BaseSeries, multipleLinesMixin, requiredIndicator, U) {
         /* *
          *
          *  License: www.highcharts.com/license
          *
+         *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
+         *
          * */
-
-
-
-        var AROON = H.seriesTypes.aroon,
-            requiredIndicator = requiredIndicatorMixin;
-
+        var merge = U.merge;
+        // im port './AroonIndicator.js';
+        var AROON = BaseSeries.seriesTypes.aroon;
         /**
          * The Aroon Oscillator series type.
          *
@@ -281,97 +299,88 @@
          *
          * @augments Highcharts.Series
          */
-        H.seriesType(
-            'aroonoscillator',
-            'aroon',
+        BaseSeries.seriesType('aroonoscillator', 'aroon', 
+        /**
+         * Aroon Oscillator. This series requires the `linkedTo` option to be set
+         * and should be loaded after the `stock/indicators/indicators.js` and
+         * `stock/indicators/aroon.js`.
+         *
+         * @sample {highstock} stock/indicators/aroon-oscillator
+         *         Aroon Oscillator
+         *
+         * @extends      plotOptions.aroon
+         * @since        7.0.0
+         * @product      highstock
+         * @excluding    allAreas, aroonDown, colorAxis, compare, compareBase,
+         *               joinBy, keys, navigatorOptions, pointInterval,
+         *               pointIntervalUnit, pointPlacement, pointRange, pointStart,
+         *               showInNavigator, stacking
+         * @requires     stock/indicators/indicators
+         * @requires     stock/indicators/aroon
+         * @requires     stock/indicators/aroon-oscillator
+         * @optionparent plotOptions.aroonoscillator
+         */
+        {
             /**
-             * Aroon Oscillator. This series requires the `linkedTo` option to be set
-             * and should be loaded after the `stock/indicators/indicators.js` and
-             * `stock/indicators/aroon.js`.
+             * Paramters used in calculation of aroon oscillator series points.
              *
-             * @sample {highstock} stock/indicators/aroon-oscillator
-             *         Aroon Oscillator
-             *
-             * @extends      plotOptions.aroon
-             * @since        7.0.0
-             * @product      highstock
-             * @excluding    allAreas, aroonDown, colorAxis, compare, compareBase,
-             *               joinBy, keys, navigatorOptions, pointInterval,
-             *               pointIntervalUnit, pointPlacement, pointRange, pointStart,
-             *               showInNavigator, stacking
-             * @optionparent plotOptions.aroonoscillator
+             * @excluding periods, index
              */
-            {
+            params: {
                 /**
-                 * Paramters used in calculation of aroon oscillator series points.
+                 * Period for Aroon Oscillator
                  *
-                 * @excluding periods, index
+                 * @since   7.0.0
+                 * @product highstock
                  */
-                params: {
-                    /**
-                     * Period for Aroon Oscillator
-                     *
-                     * @since   7.0.0
-                     * @product highstock
-                     */
-                    period: 25
-                },
-                tooltip: {
-                    pointFormat: '<span style="color:{point.color}">\u25CF</span><b> {series.name}</b>: {point.y}'
-                }
+                period: 25
             },
-            /**
-             * @lends Highcharts.Series#
-             */
-            H.merge(multipleLinesMixin, {
-                nameBase: 'Aroon Oscillator',
-                pointArrayMap: ['y'],
-                pointValKey: 'y',
-                linesApiNames: [],
-                init: function () {
-                    var args = arguments,
-                        ctx = this;
-
-                    requiredIndicator.isParentLoaded(
-                        AROON,
-                        'aroon',
-                        ctx.type,
-                        function (indicator) {
-                            indicator.prototype.init.apply(ctx, args);
-                        }
-                    );
-                },
-                getValues: function (series, params) {
-                    var ARO = [], // 0- date, 1- Aroon Oscillator
-                        xData = [],
-                        yData = [],
-                        aroon,
-                        aroonUp,
-                        aroonDown,
-                        oscillator,
-                        i;
-
-                    aroon = AROON.prototype.getValues.call(this, series, params);
-
-                    for (i = 0; i < aroon.yData.length; i++) {
-                        aroonUp = aroon.yData[i][0];
-                        aroonDown = aroon.yData[i][1];
-                        oscillator = aroonUp - aroonDown;
-
-                        ARO.push([aroon.xData[i], oscillator]);
-                        xData.push(aroon.xData[i]);
-                        yData.push(oscillator);
-                    }
-
-                    return {
-                        values: ARO,
-                        xData: xData,
-                        yData: yData
-                    };
+            tooltip: {
+                pointFormat: '<span style="color:{point.color}">\u25CF</span><b> {series.name}</b>: {point.y}'
+            }
+        }, 
+        /**
+         * @lends Highcharts.Series#
+         */
+        merge(multipleLinesMixin, {
+            nameBase: 'Aroon Oscillator',
+            pointArrayMap: ['y'],
+            pointValKey: 'y',
+            linesApiNames: [],
+            init: function () {
+                var args = arguments,
+                    ctx = this;
+                requiredIndicator.isParentLoaded(AROON, 'aroon', ctx.type, function (indicator) {
+                    indicator.prototype.init.apply(ctx, args);
+                    return;
+                });
+            },
+            getValues: function (series, params) {
+                // 0- date, 1- Aroon Oscillator
+                var ARO = [],
+                    xData = [],
+                    yData = [],
+                    aroon,
+                    aroonUp,
+                    aroonDown,
+                    oscillator,
+                    i;
+                aroon = AROON.prototype.getValues.call(this, series, params);
+                for (i = 0; i < aroon.yData.length; i++) {
+                    aroonUp = aroon.yData[i][0];
+                    aroonDown = aroon.yData[i][1];
+                    oscillator = aroonUp - aroonDown;
+                    ARO.push([aroon.xData[i], oscillator]);
+                    xData.push(aroon.xData[i]);
+                    yData.push(oscillator);
                 }
-            })
-        );
-
+                return {
+                    values: ARO,
+                    xData: xData,
+                    yData: yData
+                };
+            }
+        }));
         /**
          * An `Aroon Oscillator` series. If the [type](#series.aroonoscillator.type)
          * option is not specified, it is inherited from [chart.type](#chart.type).
@@ -383,8 +392,12 @@
          *            dataURL, joinBy, keys, navigatorOptions, pointInterval,
          *            pointIntervalUnit, pointPlacement, pointRange, pointStart,
          *            showInNavigator, stacking
+         * @requires  stock/indicators/indicators
+         * @requires  stock/indicators/aroon
+         * @requires  stock/indicators/aroon-oscillator
          * @apioption series.aroonoscillator
          */
+        ''; // adds doclet above to the transpiled file
 
     });
     _registerModule(_modules, 'masters/indicators/aroon-oscillator.src.js', [], function () {

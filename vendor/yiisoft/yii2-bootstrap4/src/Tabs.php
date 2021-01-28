@@ -142,7 +142,7 @@ class Tabs extends Widget
     {
         parent::init();
         Html::addCssClass($this->options, ['widget' => 'nav', $this->navType]);
-        Html::addCssClass($this->tabContentOptions, 'tab-content');
+        Html::addCssClass($this->tabContentOptions, ['panel' => 'tab-content']);
     }
 
     /**
@@ -189,10 +189,12 @@ class Tabs extends Widget
 
             $selected = ArrayHelper::getValue($item, 'active', false);
             $disabled = ArrayHelper::getValue($item, 'disabled', false);
+            $headerOptions = ArrayHelper::getValue($item, 'headerOptions', $this->headerOptions);
             if (isset($item['items'])) {
                 $this->prepareItems($items[$n]['items'], '-dd' . $n);
                 continue;
             } else {
+                ArrayHelper::setValue($items[$n], 'options', $headerOptions);
                 if (!isset($item['url'])) {
                     ArrayHelper::setValue($items[$n], 'url', '#' . $options['id']);
                     ArrayHelper::setValue($items[$n], 'linkOptions.data.toggle', 'tab');
@@ -208,7 +210,7 @@ class Tabs extends Widget
 
             Html::addCssClass($options, ['widget' => 'tab-pane']);
             if ($selected) {
-                Html::addCssClass($options, 'active');
+                Html::addCssClass($options, ['activate' => 'active']);
             }
 
             if ($this->renderTabContent) {

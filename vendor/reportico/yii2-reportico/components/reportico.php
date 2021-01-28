@@ -5734,8 +5734,7 @@ function save_admin_password($password1, $password2, $language)
 	if ( strlen($password1) == 0 )
 		return sw_translate("The password may not be blank");
 
-	//$proj_parent = find_best_location_in_include_path( $this->admin_projects_folder);
-	$proj_parent = $this->admin_projects_folder;
+	$proj_parent = find_best_location_in_include_path( $this->admin_projects_folder);
 	$proj_dir = $proj_parent."/admin";
 	$proj_conf = $proj_dir."/config.php";
 	$proj_template = $proj_dir."/adminconfig.template";

@@ -3,8 +3,8 @@
 /**
  * @package   yii2-export
  * @author    Kartik Visweswaran <kartikv2@gmail.com>
- * @copyright Copyright &copy; Kartik Visweswaran, Krajee.com, 2015 - 2019
- * @version   1.4.0
+ * @copyright Copyright &copy; Kartik Visweswaran, Krajee.com, 2015 - 2020
+ * @version   1.4.2
  */
 
 namespace kartik\export;
@@ -29,6 +29,7 @@ use yii\base\InvalidConfigException;
 use yii\base\Model;
 use yii\base\Widget;
 use yii\data\ActiveDataProvider;
+use yii\data\ArrayDataProvider;
 use yii\data\BaseDataProvider;
 use yii\db\ActiveQueryInterface;
 use yii\db\QueryInterface;
@@ -147,7 +148,8 @@ class ExportMenu extends GridView
      * @var array the HTML attributes for the export button menu. Applicable only if [[asDropdown]] is set to `true`.
      * The following special options are available:
      * - `label`: _string_, defaults to empty string
-     * - `icon`: _string_, defaults to `<i class="glyphicon glyphicon-export"></i>`
+     * - `icon`: _string_, defaults to `<i class="glyphicon glyphicon-export"></i>` for BS3 and
+     * `<i class="fas fa-external-link-alt"></i>` for BS4
      * - `title`: _string_, defaults to `Export data in selected format`.
      * - `menuOptions`: _array_, the HTML attributes for the dropdown menu.
      * - `itemsBefore`: _array_, any additional items that will be merged/prepended before with the export dropdown list.
@@ -189,7 +191,8 @@ class ExportMenu extends GridView
      * @var array the HTML attributes for the column selector dropdown button. The following special options are
      * recognized:
      * - `label`: _string_, defaults to empty string.
-     * - `icon`: _string_, defaults to `<i class="glyphicon glyphicon-list"></i>`
+     * - `icon`: _string_, defaults to `<i class="glyphicon glyphicon-list"></i>` for BS3 and
+     * `<i class="fas fa-list"></i>` for BS4
      * - `title`: _string_, defaults to `Select columns for export`.
      */
     public $columnSelectorOptions = [];
@@ -203,7 +206,7 @@ class ExportMenu extends GridView
      * @var array the settings for the toggle all checkbox to check / uncheck the columns as a batch. Should be setup as
      * an associative array which can have the following keys:
      * - `show`: _boolean_, whether the batch toggle checkbox is to be shown. Defaults to `true`.
-     * - `label`: _string_, the label to be displayed for toggle all. Defaults to `Toggle All`.
+     * - `label`: _string_, the label to be displayed for toggle all. Defaults to `Select Columns`.
      * - `options`: _array_, the HTML attributes for the toggle label text. Defaults to `['class'=>'kv-toggle-all']`
      */
     public $columnBatchToggleSettings = [];
@@ -796,7 +799,7 @@ class ExportMenu extends GridView
                 "Invalid permissions to write to '{$this->folder}' as set in `ExportMenu::folder` property."
             );
         }
-        $filename = iconv("UTF-8", "ISO-8859-1//TRANSLIT", $this->filename);
+        $filename = static::sanitize($this->filename);
         $file = self::slash($this->folder) . $filename . '.' . $config['extension'];
         if ($this->stream) {
             $this->clearOutputBuffers();
@@ -938,9 +941,13 @@ class ExportMenu extends GridView
     {
         $this->_provider = clone($this->dataProvider);
         if ($this->batchSize && $this->_provider->pagination) {
-            /** @noinspection PhpUndefinedFieldInspection */
             $this->_provider->pagination = clone($this->dataProvider->pagination);
             $this->_provider->pagination->pageSize = $this->batchSize;
+            $this->_provider->refresh();
+            if (Yii::$app->request->getBodyParam('exportFull_export')) {
+                $this->_provider->pagination->page = null;
+                Yii::$app->request->setQueryParams([$this->_provider->pagination->pageParam => 1]);
+            }
         } else {
             $this->_provider->pagination = false;
         }
@@ -1067,6 +1074,7 @@ class ExportMenu extends GridView
         return $this->render(
             $this->exportColumnsView,
             [
+                'id' => $this->options['id'],
                 'isBs4' => $this->isBs4(),
                 'options' => $this->columnSelectorOptions,
                 'menuOptions' => $this->columnSelectorMenuOptions,
@@ -1093,7 +1101,6 @@ class ExportMenu extends GridView
         $lastModifiedBy = 'krajee';
         extract($this->docProperties);
         $properties = $this->_objSpreadsheet->getProperties();
-        /** @noinspection PhpParamsInspection */
         $properties->setCreator($creator)
             ->setTitle($title)
             ->setSubject($subject)
@@ -1247,6 +1254,16 @@ class ExportMenu extends GridView
     }
 
     /**
+     * Gets the currently selected export type
+     *
+     * @return string
+     */
+    public function getExportType()
+    {
+        return $this->_exportType;
+    }
+
+    /**
      * Gets the column header content
      *
      * @param DataColumn $col
@@ -1302,6 +1319,9 @@ class ExportMenu extends GridView
         $this->findGroupedColumn();
         while (count($models) > 0) {
             $keys = $this->_provider->getKeys();
+            if ($this->_provider instanceof ArrayDataProvider) {
+                $models = array_values($models);
+            }
             foreach ($models as $index => $model) {
                 $key = $keys[$index];
                 $this->generateRow($model, $key, $this->_endRow);
@@ -1369,7 +1389,11 @@ class ExportMenu extends GridView
             } else {
                 $value = '';
             }
-            $format = ArrayHelper::remove($column->contentOptions, 'cellFormat', null);
+            $contentOptions = $column->contentOptions;
+            if (is_callable($contentOptions)) {
+                $contentOptions = $contentOptions($model, $key, $index, $column);
+            }
+            $format = ArrayHelper::getValue($contentOptions, 'cellFormat', null);
             $cell = $this->setOutCellValue(
                 $this->_objWorksheet,
                 self::columnName($this->_endCol) . ($index + $this->_beginRow + 1),
@@ -1714,7 +1738,7 @@ class ExportMenu extends GridView
         $this->columnSelectorOptions = array_replace_recursive(
             [
                 'id' => $id,
-                'icon' => '<i class="glyphicon glyphicon-list"></i>',
+                'icon' => $this->isBs4() ? '<i class="fas fa-list"></i>' : '<i class="glyphicon glyphicon-list"></i>',
                 'title' => Yii::t('kvexport', 'Select columns to export'),
                 'type' => 'button',
                 'data-toggle' => 'dropdown',
@@ -2067,7 +2091,7 @@ class ExportMenu extends GridView
                     $value = "=min($groupedRange)";
                     break;
             }
-            if ($value instanceof \Closure) {
+            if ($value instanceof Closure) {
                 $value = call_user_func($value, $groupedRange, $this);
             }
             $this->_groupedRow[] = !isset($value) || $value === '' ? '' : strip_tags($value);
@@ -2133,5 +2157,21 @@ class ExportMenu extends GridView
             @unlink($file);
         }
         $this->destroyPhpSpreadsheet();
+    }
+
+    /**
+     * Sanitizes file name
+     * @param string $string
+     * @return string
+     */
+    public static function sanitize($string)
+    {
+        $reserved = ['?', '[', ']', '/', '\\', '=', '<', '>', ':', ';', ',', "'", '"', '&', '$', '#', '*', '(', ')'] +
+            ['|', '~', '`', '!', '{', '}', '%', '+', '’', '«', '»', '”', '“', chr(0)];
+        $string = str_replace($reserved, '-', trim($string));
+        $string = preg_replace_callback('/[^\x20-\x7f]/', function ($match) {
+            return strtolower(str_replace('%', '', urlencode($match[0])));
+        }, $string);
+        return trim($string, ' -');
     }
 }

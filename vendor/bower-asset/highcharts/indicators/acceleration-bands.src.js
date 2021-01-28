@@ -1,5 +1,5 @@
 /**
- * @license Highstock JS v7.2.0 (2019-09-03)
+ * @license Highstock JS v8.2.2 (2020-10-22)
  *
  * Indicator series type for Highstock
  *
@@ -28,18 +28,20 @@
             obj[path] = fn.apply(null, args);
         }
     }
-    _registerModule(_modules, 'mixins/multipe-lines.js', [_modules['parts/Globals.js'], _modules['parts/Utilities.js']], function (H, U) {
+    _registerModule(_modules, 'Mixins/MultipleLines.js', [_modules['Core/Globals.js'], _modules['Core/Utilities.js']], function (H, U) {
         /**
          *
-         *  (c) 2010-2019 Wojciech Chmiel
+         *  (c) 2010-2020 Wojciech Chmiel
          *
          *  License: www.highcharts.com/license
          *
          *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
          *
          * */
-        var defined = U.defined;
-        var each = H.each, merge = H.merge, error = H.error, SMA = H.seriesTypes.sma;
+        var defined = U.defined,
+            error = U.error,
+            merge = U.merge;
+        var SMA = H.seriesTypes.sma;
         /**
          * Mixin useful for all indicators that have more than one line.
          * Merge it with your implementation where you will provide
@@ -51,51 +53,51 @@
          * @mixin multipleLinesMixin
          */
         var multipleLinesMixin = {
-            /* eslint-disable valid-jsdoc */
-            /**
-             * Lines ids. Required to plot appropriate amount of lines.
-             * Notice that pointArrayMap should have more elements than
-             * linesApiNames, because it contains main line and additional lines ids.
-             * Also it should be consistent with amount of lines calculated in
-             * getValues method from your implementation.
-             *
-             * @private
-             * @name multipleLinesMixin.pointArrayMap
-             * @type {Array<string>}
-             */
-            pointArrayMap: ['top', 'bottom'],
-            /**
-             * Main line id.
-             *
-             * @private
-             * @name multipleLinesMixin.pointValKey
-             * @type {string}
-             */
-            pointValKey: 'top',
-            /**
-             * Additional lines DOCS names. Elements of linesApiNames array should
-             * be consistent with DOCS line names defined in your implementation.
-             * Notice that linesApiNames should have decreased amount of elements
-             * relative to pointArrayMap (without pointValKey).
-             *
-             * @private
-             * @name multipleLinesMixin.linesApiNames
-             * @type {Array<string>}
-             */
-            linesApiNames: ['bottomLine'],
-            /**
-             * Create translatedLines Collection based on pointArrayMap.
-             *
-             * @private
-             * @function multipleLinesMixin.getTranslatedLinesNames
-             * @param {string} [excludedValue]
-             *        Main line id
-             * @return {Array<string>}
-             *         Returns translated lines names without excluded value.
-             */
-            getTranslatedLinesNames: function (excludedValue) {
-                var translatedLines = [];
-                each(this.pointArrayMap, function (propertyName) {
+                /* eslint-disable valid-jsdoc */
+                /**
+                 * Lines ids. Required to plot appropriate amount of lines.
+                 * Notice that pointArrayMap should have more elements than
+                 * linesApiNames, because it contains main line and additional lines ids.
+                 * Also it should be consistent with amount of lines calculated in
+                 * getValues method from your implementation.
+                 *
+                 * @private
+                 * @name multipleLinesMixin.pointArrayMap
+                 * @type {Array<string>}
+                 */
+                pointArrayMap: ['top', 'bottom'],
+                /**
+                 * Main line id.
+                 *
+                 * @private
+                 * @name multipleLinesMixin.pointValKey
+                 * @type {string}
+                 */
+                pointValKey: 'top',
+                /**
+                 * Additional lines DOCS names. Elements of linesApiNames array should
+                 * be consistent with DOCS line names defined in your implementation.
+                 * Notice that linesApiNames should have decreased amount of elements
+                 * relative to pointArrayMap (without pointValKey).
+                 *
+                 * @private
+                 * @name multipleLinesMixin.linesApiNames
+                 * @type {Array<string>}
+                 */
+                linesApiNames: ['bottomLine'],
+                /**
+                 * Create translatedLines Collection based on pointArrayMap.
+                 *
+                 * @private
+                 * @function multipleLinesMixin.getTranslatedLinesNames
+                 * @param {string} [excludedValue]
+                 *        Main line id
+                 * @return {Array<string>}
+                 *         Returns translated lines names without excluded value.
+                 */
+                getTranslatedLinesNames: function (excludedValue) {
+                    var translatedLines = [];
+                (this.pointArrayMap || []).forEach(function (propertyName) {
                     if (propertyName !== excludedValue) {
                         translatedLines.push('plot' +
                             propertyName.charAt(0).toUpperCase() +
@@ -114,7 +116,7 @@
              */
             toYData: function (point) {
                 var pointColl = [];
-                each(this.pointArrayMap, function (propertyName) {
+                (this.pointArrayMap || []).forEach(function (propertyName) {
                     pointColl.push(point[propertyName]);
                 });
                 return pointColl;
@@ -127,11 +129,14 @@
              * @return {void}
              */
             translate: function () {
-                var indicator = this, pointArrayMap = indicator.pointArrayMap, LinesNames = [], value;
+                var indicator = this,
+                    pointArrayMap = indicator.pointArrayMap,
+                    LinesNames = [],
+                    value;
                 LinesNames = indicator.getTranslatedLinesNames();
                 SMA.prototype.translate.apply(indicator, arguments);
-                each(indicator.points, function (point) {
-                    each(pointArrayMap, function (propertyName, i) {
+                indicator.points.forEach(function (point) {
+                    pointArrayMap.forEach(function (propertyName, i) {
                         value = point[propertyName];
                         if (value !== null) {
                             point[LinesNames[i]] = indicator.yAxis.toPixels(value, true);
@@ -147,15 +152,24 @@
              * @return {void}
              */
             drawGraph: function () {
-                var indicator = this, pointValKey = indicator.pointValKey, linesApiNames = indicator.linesApiNames, mainLinePoints = indicator.points, pointsLength = mainLinePoints.length, mainLineOptions = indicator.options, mainLinePath = indicator.graph, gappedExtend = {
-                    options: {
-                        gapSize: mainLineOptions.gapSize
-                    }
-                }, 
-                // additional lines point place holders:
-                secondaryLines = [], secondaryLinesNames = indicator.getTranslatedLinesNames(pointValKey), point;
+                var indicator = this,
+                    pointValKey = indicator.pointValKey,
+                    linesApiNames = indicator.linesApiNames,
+                    mainLinePoints = indicator.points,
+                    pointsLength = mainLinePoints.length,
+                    mainLineOptions = indicator.options,
+                    mainLinePath = indicator.graph,
+                    gappedExtend = {
+                        options: {
+                            gapSize: mainLineOptions.gapSize
+                        }
+                    }, 
+                    // additional lines point place holders:
+                    secondaryLines = [],
+                    secondaryLinesNames = indicator.getTranslatedLinesNames(pointValKey),
+                    point;
                 // Generate points for additional lines:
-                each(secondaryLinesNames, function (plotLine, index) {
+                secondaryLinesNames.forEach(function (plotLine, index) {
                     // create additional lines point place holders
                     secondaryLines[index] = [];
                     while (pointsLength--) {
@@ -170,7 +184,7 @@
                     pointsLength = mainLinePoints.length;
                 });
                 // Modify options and generate additional lines:
-                each(linesApiNames, function (lineName, i) {
+                linesApiNames.forEach(function (lineName, i) {
                     if (secondaryLines[i]) {
                         indicator.points = secondaryLines[i];
                         if (mainLineOptions[lineName]) {
@@ -203,34 +217,39 @@
 
         return multipleLinesMixin;
     });
-    _registerModule(_modules, 'indicators/acceleration-bands.src.js', [_modules['parts/Globals.js'], _modules['mixins/multipe-lines.js']], function (H, multipleLinesMixin) {
+    _registerModule(_modules, 'Stock/Indicators/ABIndicator.js', [_modules['Core/Series/Series.js'], _modules['Mixins/MultipleLines.js'], _modules['Core/Utilities.js']], function (BaseSeries, MultipleLinesMixin, U) {
         /* *
          *
          *  License: www.highcharts.com/license
          *
+         *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
+         *
          * */
-
-
-
-        var SMA = H.seriesTypes.sma,
-            merge = H.merge,
-            correctFloat = H.correctFloat;
-
+        var correctFloat = U.correctFloat,
+            merge = U.merge;
+        // im port './SMAIndicator.js';
+        var SMA = BaseSeries.seriesTypes.sma;
+        /* eslint-disable valid-jsdoc */
+        /**
+         * @private
+         */
         function getBaseForBand(low, high, factor) {
-            return ((
-                (correctFloat(high - low)) /
-                ((correctFloat(high + low)) / 2)
-            ) * 1000) * factor;
+            return (((correctFloat(high - low)) /
+                ((correctFloat(high + low)) / 2)) * 1000) * factor;
         }
-
+        /**
+         * @private
+         */
         function getPointUB(high, base) {
             return high * (correctFloat(1 + 2 * base));
         }
-
+        /**
+         * @private
+         */
         function getPointLB(low, base) {
             return low * (correctFloat(1 - 2 * base));
         }
-
+        /* eslint-enable valid-jsdoc */
         /**
          * The ABands series type
          *
@@ -240,165 +259,165 @@
          *
          * @augments Highcharts.Series
          */
-        H.seriesType(
-            'abands',
-            'sma',
-            /**
-             * Acceleration bands (ABANDS). This series requires the `linkedTo` option
-             * to be set and should be loaded after the
-             * `stock/indicators/indicators.js`.
-             *
-             * @sample {highstock} stock/indicators/acceleration-bands
-             *         Acceleration Bands
-             *
-             * @extends      plotOptions.sma
-             * @since        7.0.0
-             * @product      highstock
-             * @excluding    allAreas, colorAxis, compare, compareBase, joinBy, keys,
-             *               navigatorOptions, pointInterval, pointIntervalUnit,
-             *               pointPlacement, pointRange, pointStart, showInNavigator,
-             *               stacking,
-             * @optionparent plotOptions.abands
-             */
-            {
-                params: {
-                    period: 20,
-                    /**
-                     * The algorithms factor value used to calculate bands.
-                     *
-                     * @product highstock
-                     */
-                    factor: 0.001,
-                    index: 3
-                },
-                lineWidth: 1,
-                topLine: {
-                    styles: {
-                        /**
-                         * Pixel width of the line.
-                         */
-                        lineWidth: 1
-                    }
-                },
-                bottomLine: {
-                    styles: {
-                        /**
-                         * Pixel width of the line.
-                         */
-                        lineWidth: 1
-                    }
-                },
-                dataGrouping: {
-                    approximation: 'averages'
-                }
-            },
-            /**
-             * @lends Highcharts.Series#
-             */
-            merge(multipleLinesMixin, {
-                pointArrayMap: ['top', 'middle', 'bottom'],
-                pointValKey: 'middle',
-                nameBase: 'Acceleration Bands',
-                nameComponents: ['period', 'factor'],
-                linesApiNames: ['topLine', 'bottomLine'],
-                getValues: function (series, params) {
-                    var period = params.period,
-                        factor = params.factor,
-                        index = params.index,
-                        xVal = series.xData,
-                        yVal = series.yData,
-                        yValLen = yVal ? yVal.length : 0,
-                        UB = [], // Upperbands
-                        LB = [], // Lowerbands
-                        // ABANDS array structure:
-                        // 0-date, 1-top line, 2-middle line, 3-bottom line
-                        ABANDS = [],
-                        ML, TL, BL, // middle line, top line and bottom line
-                        date,
-                        bandBase,
-                        pointSMA,
-                        ubSMA,
-                        lbSMA,
-                        low = 2,
-                        high = 1,
-                        xData = [],
-                        yData = [],
-                        slicedX,
-                        slicedY,
-                        i;
-
-                    if (yValLen < period) {
-                        return false;
-                    }
-
-                    for (i = 0; i <= yValLen; i++) {
-                        // Get UB and LB values of every point. This condition
-                        // is necessary, because there is a need to calculate current
-                        // UB nad LB values simultaneously with given period SMA
-                        // in one for loop.
-                        if (i < yValLen) {
-                            bandBase = getBaseForBand(
-                                yVal[i][low],
-                                yVal[i][high],
-                                factor
-                            );
-                            UB.push(getPointUB(yVal[i][high], bandBase));
-                            LB.push(getPointLB(yVal[i][low], bandBase));
-                        }
-                        if (i >= period) {
-                            slicedX = xVal.slice(i - period, i);
-                            slicedY = yVal.slice(i - period, i);
-                            ubSMA = SMA.prototype.getValues.call(this, {
-                                xData: slicedX,
-                                yData: UB.slice(i - period, i)
-                            }, {
-                                period: period
-                            });
-                            lbSMA = SMA.prototype.getValues.call(this, {
-                                xData: slicedX,
-                                yData: LB.slice(i - period, i)
-                            }, {
-                                period: period
-                            });
-                            pointSMA = SMA.prototype.getValues.call(this, {
-                                xData: slicedX,
-                                yData: slicedY
-                            }, {
-                                period: period,
-                                index: index
-                            });
-                            date = pointSMA.xData[0];
-                            TL = ubSMA.yData[0];
-                            BL = lbSMA.yData[0];
-                            ML = pointSMA.yData[0];
-                            ABANDS.push([date, TL, ML, BL]);
-                            xData.push(date);
-                            yData.push([TL, ML, BL]);
-                        }
-                    }
-
-                    return {
-                        values: ABANDS,
-                        xData: xData,
-                        yData: yData
-                    };
-                }
-            })
-        );
-
+        BaseSeries.seriesType('abands', 'sma', 
         /**
-         * An Acceleration bands indicator. If the [type](#series.pc.type) option is not
-         * specified, it is inherited from [chart.type](#chart.type).
+         * Acceleration bands (ABANDS). This series requires the `linkedTo` option
+         * to be set and should be loaded after the
+         * `stock/indicators/indicators.js`.
          *
-         * @extends      series,plotOptions.abands
+         * @sample {highstock} stock/indicators/acceleration-bands
+         *         Acceleration Bands
+         *
+         * @extends      plotOptions.sma
+         * @mixes        Highcharts.MultipleLinesMixin
          * @since        7.0.0
          * @product      highstock
-         * @excluding    allAreas, colorAxis, compare, compareBase, dataParser, dataURL,
-         *               joinBy, keys, navigatorOptions, pointInterval,
-         *               pointIntervalUnit, pointPlacement, pointRange, pointStart,
-         *               stacking, showInNavigator,
-         * @optionparent series.abands
+         * @excluding    allAreas, colorAxis, compare, compareBase, joinBy, keys,
+         *               navigatorOptions, pointInterval, pointIntervalUnit,
+         *               pointPlacement, pointRange, pointStart, showInNavigator,
+         *               stacking,
+         * @requires     stock/indicators/indicators
+         * @requires     stock/indicators/acceleration-bands
+         * @optionparent plotOptions.abands
          */
+        {
+            params: {
+                period: 20,
+                /**
+                 * The algorithms factor value used to calculate bands.
+                 *
+                 * @product highstock
+                 */
+                factor: 0.001,
+                index: 3
+            },
+            lineWidth: 1,
+            topLine: {
+                styles: {
+                    /**
+                     * Pixel width of the line.
+                     */
+                    lineWidth: 1
+                }
+            },
+            bottomLine: {
+                styles: {
+                    /**
+                     * Pixel width of the line.
+                     */
+                    lineWidth: 1
+                }
+            },
+            dataGrouping: {
+                approximation: 'averages'
+            }
+        }, 
+        /**
+         * @lends Highcharts.Series#
+         */
+        merge(MultipleLinesMixin, {
+            pointArrayMap: ['top', 'middle', 'bottom'],
+            pointValKey: 'middle',
+            nameBase: 'Acceleration Bands',
+            nameComponents: ['period', 'factor'],
+            linesApiNames: ['topLine', 'bottomLine'],
+            getValues: function (series, params) {
+                var period = params.period,
+                    factor = params.factor,
+                    index = params.index,
+                    xVal = series.xData,
+                    yVal = series.yData,
+                    yValLen = yVal ? yVal.length : 0, 
+                    // Upperbands
+                    UB = [], 
+                    // Lowerbands
+                    LB = [], 
+                    // ABANDS array structure:
+                    // 0-date, 1-top line, 2-middle line, 3-bottom line
+                    ABANDS = [], 
+                    // middle line, top line and bottom line
+                    ML,
+                    TL,
+                    BL,
+                    date,
+                    bandBase,
+                    pointSMA,
+                    ubSMA,
+                    lbSMA,
+                    low = 2,
+                    high = 1,
+                    xData = [],
+                    yData = [],
+                    slicedX,
+                    slicedY,
+                    i;
+                if (yValLen < period) {
+                    return;
+                }
+                for (i = 0; i <= yValLen; i++) {
+                    // Get UB and LB values of every point. This condition
+                    // is necessary, because there is a need to calculate current
+                    // UB nad LB values simultaneously with given period SMA
+                    // in one for loop.
+                    if (i < yValLen) {
+                        bandBase = getBaseForBand(yVal[i][low], yVal[i][high], factor);
+                        UB.push(getPointUB(yVal[i][high], bandBase));
+                        LB.push(getPointLB(yVal[i][low], bandBase));
+                    }
+                    if (i >= period) {
+                        slicedX = xVal.slice(i - period, i);
+                        slicedY = yVal.slice(i - period, i);
+                        ubSMA = SMA.prototype.getValues.call(this, {
+                            xData: slicedX,
+                            yData: UB.slice(i - period, i)
+                        }, {
+                            period: period
+                        });
+                        lbSMA = SMA.prototype.getValues.call(this, {
+                            xData: slicedX,
+                            yData: LB.slice(i - period, i)
+                        }, {
+                            period: period
+                        });
+                        pointSMA = SMA.prototype.getValues.call(this, {
+                            xData: slicedX,
+                            yData: slicedY
+                        }, {
+                            period: period,
+                            index: index
+                        });
+                        date = pointSMA.xData[0];
+                        TL = ubSMA.yData[0];
+                        BL = lbSMA.yData[0];
+                        ML = pointSMA.yData[0];
+                        ABANDS.push([date, TL, ML, BL]);
+                        xData.push(date);
+                        yData.push([TL, ML, BL]);
+                    }
+                }
+                return {
+                    values: ABANDS,
+                    xData: xData,
+                    yData: yData
+                };
+            }
+        }));
+        /**
+         * An Acceleration bands indicator. If the [type](#series.abands.type) option is not
+         * specified, it is inherited from [chart.type](#chart.type).
+         *
+         * @extends   series,plotOptions.abands
+         * @since     7.0.0
+         * @product   highstock
+         * @excluding allAreas, colorAxis, compare, compareBase, dataParser, dataURL,
+         *            joinBy, keys, navigatorOptions, pointInterval,
+         *            pointIntervalUnit, pointPlacement, pointRange, pointStart,
+         *            stacking, showInNavigator,
+         * @requires  stock/indicators/indicators
+         * @requires  stock/indicators/acceleration-bands
+         * @apioption series.abands
+         */
+        ''; // to include the above in jsdoc
 
     });
     _registerModule(_modules, 'masters/indicators/acceleration-bands.src.js', [], function () {

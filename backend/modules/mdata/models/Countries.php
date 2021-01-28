@@ -22,6 +22,8 @@ class Countries extends \yii\db\ActiveRecord
         return 'countries';
     }
 
+    public $fileImport;
+    
     /**
      * {@inheritdoc}
      */

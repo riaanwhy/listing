@@ -1,5 +1,5 @@
 /**
- * @license Highstock JS v7.2.0 (2019-09-03)
+ * @license Highstock JS v8.2.2 (2020-10-22)
  *
  * Indicator series type for Highstock
  *
@@ -28,18 +28,20 @@
             obj[path] = fn.apply(null, args);
         }
     }
-    _registerModule(_modules, 'mixins/multipe-lines.js', [_modules['parts/Globals.js'], _modules['parts/Utilities.js']], function (H, U) {
+    _registerModule(_modules, 'Mixins/MultipleLines.js', [_modules['Core/Globals.js'], _modules['Core/Utilities.js']], function (H, U) {
         /**
          *
-         *  (c) 2010-2019 Wojciech Chmiel
+         *  (c) 2010-2020 Wojciech Chmiel
          *
          *  License: www.highcharts.com/license
          *
          *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
          *
          * */
-        var defined = U.defined;
-        var each = H.each, merge = H.merge, error = H.error, SMA = H.seriesTypes.sma;
+        var defined = U.defined,
+            error = U.error,
+            merge = U.merge;
+        var SMA = H.seriesTypes.sma;
         /**
          * Mixin useful for all indicators that have more than one line.
          * Merge it with your implementation where you will provide
@@ -51,51 +53,51 @@
          * @mixin multipleLinesMixin
          */
         var multipleLinesMixin = {
-            /* eslint-disable valid-jsdoc */
-            /**
-             * Lines ids. Required to plot appropriate amount of lines.
-             * Notice that pointArrayMap should have more elements than
-             * linesApiNames, because it contains main line and additional lines ids.
-             * Also it should be consistent with amount of lines calculated in
-             * getValues method from your implementation.
-             *
-             * @private
-             * @name multipleLinesMixin.pointArrayMap
-             * @type {Array<string>}
-             */
-            pointArrayMap: ['top', 'bottom'],
-            /**
-             * Main line id.
-             *
-             * @private
-             * @name multipleLinesMixin.pointValKey
-             * @type {string}
-             */
-            pointValKey: 'top',
-            /**
-             * Additional lines DOCS names. Elements of linesApiNames array should
-             * be consistent with DOCS line names defined in your implementation.
-             * Notice that linesApiNames should have decreased amount of elements
-             * relative to pointArrayMap (without pointValKey).
-             *
-             * @private
-             * @name multipleLinesMixin.linesApiNames
-             * @type {Array<string>}
-             */
-            linesApiNames: ['bottomLine'],
-            /**
-             * Create translatedLines Collection based on pointArrayMap.
-             *
-             * @private
-             * @function multipleLinesMixin.getTranslatedLinesNames
-             * @param {string} [excludedValue]
-             *        Main line id
-             * @return {Array<string>}
-             *         Returns translated lines names without excluded value.
-             */
-            getTranslatedLinesNames: function (excludedValue) {
-                var translatedLines = [];
-                each(this.pointArrayMap, function (propertyName) {
+                /* eslint-disable valid-jsdoc */
+                /**
+                 * Lines ids. Required to plot appropriate amount of lines.
+                 * Notice that pointArrayMap should have more elements than
+                 * linesApiNames, because it contains main line and additional lines ids.
+                 * Also it should be consistent with amount of lines calculated in
+                 * getValues method from your implementation.
+                 *
+                 * @private
+                 * @name multipleLinesMixin.pointArrayMap
+                 * @type {Array<string>}
+                 */
+                pointArrayMap: ['top', 'bottom'],
+                /**
+                 * Main line id.
+                 *
+                 * @private
+                 * @name multipleLinesMixin.pointValKey
+                 * @type {string}
+                 */
+                pointValKey: 'top',
+                /**
+                 * Additional lines DOCS names. Elements of linesApiNames array should
+                 * be consistent with DOCS line names defined in your implementation.
+                 * Notice that linesApiNames should have decreased amount of elements
+                 * relative to pointArrayMap (without pointValKey).
+                 *
+                 * @private
+                 * @name multipleLinesMixin.linesApiNames
+                 * @type {Array<string>}
+                 */
+                linesApiNames: ['bottomLine'],
+                /**
+                 * Create translatedLines Collection based on pointArrayMap.
+                 *
+                 * @private
+                 * @function multipleLinesMixin.getTranslatedLinesNames
+                 * @param {string} [excludedValue]
+                 *        Main line id
+                 * @return {Array<string>}
+                 *         Returns translated lines names without excluded value.
+                 */
+                getTranslatedLinesNames: function (excludedValue) {
+                    var translatedLines = [];
+                (this.pointArrayMap || []).forEach(function (propertyName) {
                     if (propertyName !== excludedValue) {
                         translatedLines.push('plot' +
                             propertyName.charAt(0).toUpperCase() +
@@ -114,7 +116,7 @@
              */
             toYData: function (point) {
                 var pointColl = [];
-                each(this.pointArrayMap, function (propertyName) {
+                (this.pointArrayMap || []).forEach(function (propertyName) {
                     pointColl.push(point[propertyName]);
                 });
                 return pointColl;
@@ -127,11 +129,14 @@
              * @return {void}
              */
             translate: function () {
-                var indicator = this, pointArrayMap = indicator.pointArrayMap, LinesNames = [], value;
+                var indicator = this,
+                    pointArrayMap = indicator.pointArrayMap,
+                    LinesNames = [],
+                    value;
                 LinesNames = indicator.getTranslatedLinesNames();
                 SMA.prototype.translate.apply(indicator, arguments);
-                each(indicator.points, function (point) {
-                    each(pointArrayMap, function (propertyName, i) {
+                indicator.points.forEach(function (point) {
+                    pointArrayMap.forEach(function (propertyName, i) {
                         value = point[propertyName];
                         if (value !== null) {
                             point[LinesNames[i]] = indicator.yAxis.toPixels(value, true);
@@ -147,15 +152,24 @@
              * @return {void}
              */
             drawGraph: function () {
-                var indicator = this, pointValKey = indicator.pointValKey, linesApiNames = indicator.linesApiNames, mainLinePoints = indicator.points, pointsLength = mainLinePoints.length, mainLineOptions = indicator.options, mainLinePath = indicator.graph, gappedExtend = {
-                    options: {
-                        gapSize: mainLineOptions.gapSize
-                    }
-                }, 
-                // additional lines point place holders:
-                secondaryLines = [], secondaryLinesNames = indicator.getTranslatedLinesNames(pointValKey), point;
+                var indicator = this,
+                    pointValKey = indicator.pointValKey,
+                    linesApiNames = indicator.linesApiNames,
+                    mainLinePoints = indicator.points,
+                    pointsLength = mainLinePoints.length,
+                    mainLineOptions = indicator.options,
+                    mainLinePath = indicator.graph,
+                    gappedExtend = {
+                        options: {
+                            gapSize: mainLineOptions.gapSize
+                        }
+                    }, 
+                    // additional lines point place holders:
+                    secondaryLines = [],
+                    secondaryLinesNames = indicator.getTranslatedLinesNames(pointValKey),
+                    point;
                 // Generate points for additional lines:
-                each(secondaryLinesNames, function (plotLine, index) {
+                secondaryLinesNames.forEach(function (plotLine, index) {
                     // create additional lines point place holders
                     secondaryLines[index] = [];
                     while (pointsLength--) {
@@ -170,7 +184,7 @@
                     pointsLength = mainLinePoints.length;
                 });
                 // Modify options and generate additional lines:
-                each(linesApiNames, function (lineName, i) {
+                linesApiNames.forEach(function (lineName, i) {
                     if (secondaryLines[i]) {
                         indicator.points = secondaryLines[i];
                         if (mainLineOptions[lineName]) {
@@ -203,21 +217,23 @@
 
         return multipleLinesMixin;
     });
-    _registerModule(_modules, 'indicators/keltner-channels.src.js', [_modules['parts/Globals.js'], _modules['mixins/multipe-lines.js']], function (H, multipleLinesMixin) {
+    _registerModule(_modules, 'Stock/Indicators/KeltnerChannelsIndicator.js', [_modules['Core/Series/Series.js'], _modules['Mixins/MultipleLines.js'], _modules['Core/Utilities.js']], function (BaseSeries, MultipleLinesMixin, U) {
         /* *
          *
          *  License: www.highcharts.com/license
          *
+         *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
+         *
          * */
-
-
-
-        var SMA = H.seriesTypes.sma,
-            EMA = H.seriesTypes.ema,
-            ATR = H.seriesTypes.atr,
-            merge = H.merge,
-            correctFloat = H.correctFloat;
-
+        var seriesTypes = BaseSeries.seriesTypes;
+        var correctFloat = U.correctFloat,
+            merge = U.merge;
+        // im port './ATRIndicator.js';
+        // im port './EMAIndicator.js';
+        // im port './SMAIndicator.js';
+        var SMA = seriesTypes.sma,
+            EMA = seriesTypes.ema,
+            ATR = seriesTypes.atr;
         /**
          * The Keltner Channels series type.
          *
@@ -227,159 +243,155 @@
          *
          * @augments Highcharts.Series
          */
-        H.seriesType(
-            'keltnerchannels',
-            'sma',
-            /**
-             * Keltner Channels. This series requires the `linkedTo` option to be set
-             * and should be loaded after the `stock/indicators/indicators.js`,
-             * `stock/indicators/atr.js`, and `stock/ema/.js`.
-             *
-             * @sample {highstock} stock/indicators/keltner-channels
-             *         Keltner Channels
-             *
-             * @extends      plotOptions.sma
-             * @since        7.0.0
-             * @product      highstock
-             * @excluding    allAreas, colorAxis, compare, compareBase, joinBy, keys,
-             *               navigatorOptions, pointInterval, pointIntervalUnit,
-             *               pointPlacement, pointRange, pointStart,showInNavigator,
-             *               stacking
-             * @optionparent plotOptions.keltnerchannels
-             */
-            {
-                params: {
-                    period: 20,
-                    /**
-                     * The ATR period.
-                     */
-                    periodATR: 10,
-                    /**
-                     * The ATR multiplier.
-                     */
-                    multiplierATR: 2
-                },
+        BaseSeries.seriesType('keltnerchannels', 'sma', 
+        /**
+         * Keltner Channels. This series requires the `linkedTo` option to be set
+         * and should be loaded after the `stock/indicators/indicators.js`,
+         * `stock/indicators/atr.js`, and `stock/ema/.js`.
+         *
+         * @sample {highstock} stock/indicators/keltner-channels
+         *         Keltner Channels
+         *
+         * @extends      plotOptions.sma
+         * @since        7.0.0
+         * @product      highstock
+         * @excluding    allAreas, colorAxis, compare, compareBase, joinBy, keys,
+         *               navigatorOptions, pointInterval, pointIntervalUnit,
+         *               pointPlacement, pointRange, pointStart,showInNavigator,
+         *               stacking
+         * @requires     stock/indicators/indicators
+         * @requires     stock/indicators/keltner-channels
+         * @optionparent plotOptions.keltnerchannels
+         */
+        {
+            params: {
+                period: 20,
                 /**
-                 * Bottom line options.
-                 *
+                 * The ATR period.
                  */
-                bottomLine: {
-                    /**
-                     * Styles for a bottom line.
-                     *
-                     */
-                    styles: {
-                        /**
-                         * Pixel width of the line.
-                         */
-                        lineWidth: 1,
-                        /**
-                         * Color of the line. If not set, it's inherited from
-                         * `plotOptions.keltnerchannels.color`
-                         */
-                        lineColor: undefined
-                    }
-                },
+                periodATR: 10,
                 /**
-                 * Top line options.
-                 *
-                 * @extends plotOptions.keltnerchannels.bottomLine
+                 * The ATR multiplier.
                  */
-                topLine: {
-                    styles: {
-                        lineWidth: 1,
-                        lineColor: undefined
-                    }
-                },
-                tooltip: {
-                    pointFormat: '<span style="color:{point.color}">\u25CF</span><b> {series.name}</b><br/>Upper Channel: {point.top}<br/>EMA({series.options.params.period}): {point.middle}<br/>Lower Channel: {point.bottom}<br/>'
-                },
-                marker: {
-                    enabled: false
-                },
-                dataGrouping: {
-                    approximation: 'averages'
-                },
-                lineWidth: 1
+                multiplierATR: 2
             },
             /**
-             * @lends Highcharts.Series#
+             * Bottom line options.
+             *
              */
-            merge(multipleLinesMixin, {
-                pointArrayMap: ['top', 'middle', 'bottom'],
-                pointValKey: 'middle',
-                nameBase: 'Keltner Channels',
-                nameComponents: ['period', 'periodATR', 'multiplierATR'],
-                linesApiNames: ['topLine', 'bottomLine'],
-                requiredIndicators: ['ema', 'atr'],
-                init: function () {
-                    SMA.prototype.init.apply(this, arguments);
-                    // Set default color for lines:
-                    this.options = merge({
-                        topLine: {
-                            styles: {
-                                lineColor: this.color
-                            }
-                        },
-                        bottomLine: {
-                            styles: {
-                                lineColor: this.color
-                            }
-                        }
-                    }, this.options);
-                },
-                getValues: function (series, params) {
-                    var period = params.period,
-                        periodATR = params.periodATR,
-                        multiplierATR = params.multiplierATR,
-                        index = params.index,
-                        yVal = series.yData,
-                        yValLen = yVal ? yVal.length : 0,
-                        // Keltner Channels array structure:
-                        // 0-date, 1-top line, 2-middle line, 3-bottom line
-                        KC = [],
-                        ML, TL, BL, // middle line, top line and bottom line
-                        date,
-                        seriesEMA = EMA.prototype.getValues(series,
-                            {
-                                period: period,
-                                index: index
-                            }),
-                        seriesATR = ATR.prototype.getValues(series,
-                            {
-                                period: periodATR
-                            }),
-                        pointEMA,
-                        pointATR,
-                        xData = [],
-                        yData = [],
-                        i;
-
-                    if (yValLen < period) {
-                        return false;
-                    }
-
-                    for (i = period; i <= yValLen; i++) {
-                        pointEMA = seriesEMA.values[i - period];
-                        pointATR = seriesATR.values[i - periodATR];
-                        date = pointEMA[0];
-                        TL = correctFloat(pointEMA[1] + (multiplierATR * pointATR[1]));
-                        BL = correctFloat(pointEMA[1] - (multiplierATR * pointATR[1]));
-                        ML = pointEMA[1];
-                        KC.push([date, TL, ML, BL]);
-                        xData.push(date);
-                        yData.push([TL, ML, BL]);
-                    }
-
-                    return {
-                        values: KC,
-                        xData: xData,
-                        yData: yData
-                    };
+            bottomLine: {
+                /**
+                 * Styles for a bottom line.
+                 *
+                 */
+                styles: {
+                    /**
+                     * Pixel width of the line.
+                     */
+                    lineWidth: 1,
+                    /**
+                     * Color of the line. If not set, it's inherited from
+                     * `plotOptions.keltnerchannels.color`
+                     */
+                    lineColor: void 0
                 }
-            })
-        );
-
+            },
+            /**
+             * Top line options.
+             *
+             * @extends plotOptions.keltnerchannels.bottomLine
+             */
+            topLine: {
+                styles: {
+                    lineWidth: 1,
+                    lineColor: void 0
+                }
+            },
+            tooltip: {
+                pointFormat: '<span style="color:{point.color}">\u25CF</span><b> {series.name}</b><br/>Upper Channel: {point.top}<br/>EMA({series.options.params.period}): {point.middle}<br/>Lower Channel: {point.bottom}<br/>'
+            },
+            marker: {
+                enabled: false
+            },
+            dataGrouping: {
+                approximation: 'averages'
+            },
+            lineWidth: 1
+        }, 
+        /**
+         * @lends Highcharts.Series#
+         */
+        merge(MultipleLinesMixin, {
+            pointArrayMap: ['top', 'middle', 'bottom'],
+            pointValKey: 'middle',
+            nameBase: 'Keltner Channels',
+            nameComponents: ['period', 'periodATR', 'multiplierATR'],
+            linesApiNames: ['topLine', 'bottomLine'],
+            requiredIndicators: ['ema', 'atr'],
+            init: function () {
+                SMA.prototype.init.apply(this, arguments);
+                // Set default color for lines:
+                this.options = merge({
+                    topLine: {
+                        styles: {
+                            lineColor: this.color
+                        }
+                    },
+                    bottomLine: {
+                        styles: {
+                            lineColor: this.color
+                        }
+                    }
+                }, this.options);
+            },
+            getValues: function (series, params) {
+                var period = params.period,
+                    periodATR = params.periodATR,
+                    multiplierATR = params.multiplierATR,
+                    index = params.index,
+                    yVal = series.yData,
+                    yValLen = yVal ? yVal.length : 0, 
+                    // Keltner Channels array structure:
+                    // 0-date, 1-top line, 2-middle line, 3-bottom line
+                    KC = [], 
+                    // middle line, top line and bottom lineI
+                    ML,
+                    TL,
+                    BL,
+                    date,
+                    seriesEMA = EMA.prototype.getValues(series, {
+                        period: period,
+                        index: index
+                    }),
+                    seriesATR = ATR.prototype.getValues(series, {
+                        period: periodATR
+                    }),
+                    pointEMA,
+                    pointATR,
+                    xData = [],
+                    yData = [],
+                    i;
+                if (yValLen < period) {
+                    return;
+                }
+                for (i = period; i <= yValLen; i++) {
+                    pointEMA = seriesEMA.values[i - period];
+                    pointATR = seriesATR.values[i - periodATR];
+                    date = pointEMA[0];
+                    TL = correctFloat(pointEMA[1] + (multiplierATR * pointATR[1]));
+                    BL = correctFloat(pointEMA[1] - (multiplierATR * pointATR[1]));
+                    ML = pointEMA[1];
+                    KC.push([date, TL, ML, BL]);
+                    xData.push(date);
+                    yData.push([TL, ML, BL]);
+                }
+                return {
+                    values: KC,
+                    xData: xData,
+                    yData: yData
+                };
+            }
+        }));
         /**
          * A Keltner Channels indicator. If the [type](#series.keltnerchannels.type)
          * option is not specified, it is inherited from[chart.type](#chart.type).
@@ -391,8 +403,11 @@
          *               joinBy, keys, navigatorOptions, pointInterval,
          *               pointIntervalUnit, pointPlacement, pointRange, pointStart,
          *               stacking, showInNavigator
-         * @optionparent series.keltnerchannels
+         * @requires     stock/indicators/indicators
+         * @requires     stock/indicators/keltner-channels
+         * @apioption    series.keltnerchannels
          */
+        ''; // to include the above in the js output
 
     });
     _registerModule(_modules, 'masters/indicators/keltner-channels.src.js', [], function () {

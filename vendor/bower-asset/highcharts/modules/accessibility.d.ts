@@ -15,6 +15,10 @@ export function factory(highcharts: typeof Highcharts): void;
 declare module "../highcharts" {
     interface Chart {
         /**
+         * Dismiss popup content in chart, including export menu and tooltip.
+         */
+        dismissPopupContent(): void;
+        /**
          * Apply context to a format string from lang options of the chart.
          *
          * @param langKey
@@ -27,31 +31,52 @@ declare module "../highcharts" {
          */
         langFormat(langKey: string, context: Dictionary<any>): string;
     }
+    /**
+     * Options for the keyboard navigation handler.
+     */
+    interface KeyboardNavigationHandlerOptionsObject {
+        /**
+         * Function to run on initialization of module.
+         */
+        init: Function;
+        /**
+         * An array containing pairs of an array of keycodes, mapped to a
+         * handler function. When the keycode is received, the handler is called
+         * with the keycode as parameter.
+         */
+        keyCodeMap: Array<[Array<number>, Function]>;
+        /**
+         * Function to run before moving to next/prev module. Receives moving
+         * direction as parameter: +1 for next, -1 for previous.
+         */
+        terminate?: Function;
+        /**
+         * Function to run to validate module. Should return false if module
+         * should not run, true otherwise. Receives chart as parameter.
+         */
+        validate?: Function;
+    }
     interface PointAccessibilityOptionsObject {
         /**
          * Provide a description of the data point, announced to screen readers.
          */
         description?: string;
     }
+    interface PointOptionsObject {
+        accessibility?: PointAccessibilityOptionsObject;
+    }
     /**
      * The AccessibilityComponent base class, representing a part of the chart
      * that has accessibility logic connected to it. This class can be inherited
      * from to create a custom accessibility component for a chart.
      *
-     * A component:
-     *
-     * - Must call initBase after inheriting.
-     *
-     * - Can override any of the following functions: init(), destroy(),
-     * getKeyboardNavigation(), onChartUpdate().
-     *
-     * - Should take care to destroy added elements and unregister event
-     * handlers on destroy.
+     * Components should take care to destroy added elements and unregister
+     * event handlers on destroy. This is handled automatically if using
+     * this.addEvent and this.createElement.
      */
     class AccessibilityComponent {
         /**
-         * Called when accessibility is disabled or chart is destroyed. Should
-         * call destroyBase to make sure events/elements added are removed.
+         * Called when accessibility is disabled or chart is destroyed.
          */
         static destroy(): void;
         /**
@@ -59,7 +84,7 @@ declare module "../highcharts" {
          */
         static getKeyboardNavigation(): KeyboardNavigationHandler;
         /**
-         * Initialize component.
+         * Called on component initialization.
          */
         static init(): void;
         /**
@@ -88,24 +113,10 @@ declare module "../highcharts" {
          * @param chart
          *        The chart this module should act on.
          *
-         * @param keyCodeMap
-         *        An array containing pairs of an array of keycodes, mapped to a
-         *        handler function. When the keycode is received, the handler is
-         *        called with the keycode as parameter.
-         *
-         * @param init
-         *        Function to run on initialization of module
-         *
-         * @param validate
-         *        Function to run to validate module. Should return false if
-         *        module should not run, true otherwise. Receives chart as
-         *        parameter.
-         *
-         * @param terminate
-         *        Function to run before moving to next/prev module. Receives
-         *        moving direction as parameter: +1 for next, -1 for previous.
+         * @param options
+         *        Options for the keyboard navigation handler.
          */
-        constructor(chart: Chart, options: object, keyCodeMap: [Array<number>, Function], init?: Function, validate?: Function, terminate?: Function);
+        constructor(chart: Chart, options: KeyboardNavigationHandlerOptionsObject);
     }
     /**
      * i18n formatting function. Extends Highcharts.format() functionality by
@@ -167,12 +178,27 @@ declare module "../highcharts" {
      * @param context
      *        Context to apply to the format string.
      *
-     * @param time
-     *        A `Time` instance for date formatting, passed on to H.format().
+     * @param chart
+     *        A `Chart` instance with a time object and numberFormatter, passed
+     *        on to format().
      *
      * @return The formatted string.
      */
-    function i18nFormat(formatString: string, context: Dictionary<any>, time: Time): string;
+    function i18nFormat(formatString: string, context: Dictionary<any>, chart: Chart): string;
+    /**
+     * If we have a clear root option node for old and new options and a mapping
+     * between, we can use this generic function for the copy and warn logic.
+     */
+    function deprecateFromOptionsMap(): void;
+    /**
+     * Put accessible info on series and points of a series.
+     *
+     * @param series
+     *        The series to add info on.
+     */
+    function describeSeries(series: Series): void;
+    function getAxisDescription(axis: Axis): string;
+    function getChartTitle(): string;
 }
 export default factory;
 export let Highcharts: typeof _Highcharts;

@@ -1,5 +1,5 @@
 /**
- * @license Highstock JS v7.2.0 (2019-09-03)
+ * @license Highstock JS v8.2.2 (2020-10-22)
  * @module highcharts/indicators/pivot-points
  * @requires highcharts
  * @requires highcharts/modules/stock
@@ -11,4 +11,4 @@
  * License: www.highcharts.com/license
  */
 'use strict';
-import '../../indicators/pivot-points.src.js';
+import '../../Stock/Indicators/PivotPointsIndicator.js';

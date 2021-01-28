@@ -1,5 +1,5 @@
 /*
- Highcharts Gantt JS v7.2.0 (2019-09-03)
+ Highcharts Gantt JS v8.2.2 (2020-10-22)
 
  StaticScale
 
@@ -7,7 +7,7 @@
 
  License: www.highcharts.com/license
 */
-(function(a){"object"===typeof module&&module.exports?(a["default"]=a,module.exports=a):"function"===typeof define&&define.amd?define("highcharts/modules/static-scale",["highcharts"],function(c){a(c);a.Highcharts=c;return a}):a("undefined"!==typeof Highcharts?Highcharts:void 0)})(function(a){function c(a,b,c,d){a.hasOwnProperty(b)||(a[b]=d.apply(null,c))}a=a?a._modules:{};c(a,"modules/static-scale.src.js",[a["parts/Globals.js"],a["parts/Utilities.js"]],function(a,b){var c=b.defined,d=b.isNumber;b=
-a.Chart;var g=a.pick;a.addEvent(a.Axis,"afterSetOptions",function(){var a=this.chart.options&&this.chart.options.chart;!this.horiz&&d(this.options.staticScale)&&(!a.height||a.scrollablePlotArea&&a.scrollablePlotArea.minHeight)&&(this.staticScale=this.options.staticScale)});b.prototype.adjustHeight=function(){"adjustHeight"!==this.redrawTrigger&&((this.axes||[]).forEach(function(a){var b=a.chart,d=!!b.initiatedScale&&b.options.animation,e=a.options.staticScale;if(a.staticScale&&c(a.min)){var f=g(a.unitLength,
-a.max+a.tickInterval-a.min)*e;f=Math.max(f,e);e=f-b.plotHeight;1<=Math.abs(e)&&(b.plotHeight=f,b.redrawTrigger="adjustHeight",b.setSize(void 0,b.chartHeight+e,d));a.series.forEach(function(a){(a=a.sharedClipKey&&b[a.sharedClipKey])&&a.attr({height:b.plotHeight})})}}),this.initiatedScale=!0);this.redrawTrigger=null};a.addEvent(b,"render",b.prototype.adjustHeight)});c(a,"masters/modules/static-scale.src.js",[],function(){})});
+(function(a){"object"===typeof module&&module.exports?(a["default"]=a,module.exports=a):"function"===typeof define&&define.amd?define("highcharts/modules/static-scale",["highcharts"],function(b){a(b);a.Highcharts=b;return a}):a("undefined"!==typeof Highcharts?Highcharts:void 0)})(function(a){function b(a,c,d,b){a.hasOwnProperty(c)||(a[c]=b.apply(null,d))}a=a?a._modules:{};b(a,"Extensions/StaticScale.js",[a["Core/Axis/Axis.js"],a["Core/Chart/Chart.js"],a["Core/Utilities.js"]],function(a,b,d){var c=
+d.addEvent,f=d.defined,g=d.isNumber,h=d.pick;c(a,"afterSetOptions",function(){var a=this.chart.options&&this.chart.options.chart;!this.horiz&&g(this.options.staticScale)&&(!a.height||a.scrollablePlotArea&&a.scrollablePlotArea.minHeight)&&(this.staticScale=this.options.staticScale)});b.prototype.adjustHeight=function(){"adjustHeight"!==this.redrawTrigger&&((this.axes||[]).forEach(function(a){var b=a.chart,d=!!b.initiatedScale&&b.options.animation,c=a.options.staticScale;if(a.staticScale&&f(a.min)){var e=
+h(a.brokenAxis&&a.brokenAxis.unitLength,a.max+a.tickInterval-a.min)*c;e=Math.max(e,c);c=e-b.plotHeight;1<=Math.abs(c)&&(b.plotHeight=e,b.redrawTrigger="adjustHeight",b.setSize(void 0,b.chartHeight+c,d));a.series.forEach(function(a){(a=a.sharedClipKey&&b[a.sharedClipKey])&&a.attr({height:b.plotHeight})})}}),this.initiatedScale=!0);this.redrawTrigger=null};c(b,"render",b.prototype.adjustHeight)});b(a,"masters/modules/static-scale.src.js",[],function(){})});
 //# sourceMappingURL=static-scale.js.map

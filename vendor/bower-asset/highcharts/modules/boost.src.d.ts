@@ -46,10 +46,14 @@ declare module "../highcharts.src" {
          *        A stripped-down point object
          *
          * @return A Point object as per
-         *         http://api.highcharts.com/highcharts#Point
+         *         https://api.highcharts.com/highcharts#Point
          */
-        getPoint(boostPoint: (object|Point)): object;
+        getPoint(boostPoint: (object|Point)): Point;
     }
+    /**
+     * Initialize the canvas boost.
+     */
+    function initCanvasBoost(): void;
 }
 export default factory;
 export let Highcharts: typeof _Highcharts;
