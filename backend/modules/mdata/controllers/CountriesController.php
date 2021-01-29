@@ -137,9 +137,9 @@ class CountriesController extends Controller
 
                 $no                    =  (String)$data[0];
               
-                $nama           =  $data[1];
+                $nama           =  (String)$data[1];
 
-
+               $obj = new Countries();
                $obj = Countries::find()->where(['name'=>$nama])->one();
                
                if ($obj->id == null) {

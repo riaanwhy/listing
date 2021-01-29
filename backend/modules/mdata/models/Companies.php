@@ -35,8 +35,10 @@ class Companies extends \yii\db\ActiveRecord
     {
         return 'companies';
     }
+    public $fileImport;
 
     /**
+
      * {@inheritdoc}
      */
     public function rules()

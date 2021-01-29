@@ -9,6 +9,13 @@ use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
+use moonland\phpexcel\Excel;
+use arturoliveira\ExcelView;
+
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use yii\web\UploadedFile;
+
+
 /**
  * CompaniesController implements the CRUD actions for Companies model.
  */
@@ -123,5 +130,145 @@ class CompaniesController extends Controller
         }
 
         throw new NotFoundHttpException(Yii::t('app', 'The requested page does not exist.'));
+    }
+
+
+
+      public function simpanDariXLS($data){
+
+                $no                    =  (String)$data[0];
+
+                $sic_code              =  (String)$data[1];
+
+                $nama                  =  (String)$data[2];
+
+                $sector                =  (String)$data[3];
+
+                $subsector             =  (String)$data[4];
+
+                $country               =  (String)$data[5];
+
+                $exchange              =  $data[6];
+
+                $website               =  $data[7];
+
+                $profil                =  $data[8];
+
+
+             $obj = new Companies();
+             $obj = Companies::find()->where(['name'=>$nama])->one();
+               
+               if ($obj->id == null) {
+                    # code...
+
+                $model = new Companies;
+                $model->name = $nama;
+                $model->save();
+                } 
+                else{
+
+                $obj->name = $nama;
+                $obj->save();
+                }
+
+               
+
+    }
+
+
+    public function actionImport(){
+           
+        $ar_data = array();
+
+             $modelImport = new  Companies([
+            'fileImport' => 'File Import',
+        ]);
+          if(Yii::$app->request->post()) {
+                  $modelImport->fileImport = \yii\web\UploadedFile::getInstance($modelImport,'fileImport');
+             
+                  if($modelImport->fileImport){
+                    
+                      $inputFileType = \PHPExcel_IOFactory::identify($modelImport->fileImport->tempName);
+                      $objReader = \PHPExcel_IOFactory::createReader($inputFileType);
+                      $objPHPExcel = $objReader->load($modelImport->fileImport->tempName);
+                      $objPHPExcel->setActiveSheetIndex(0);
+                      $sheetData = $objPHPExcel->getActiveSheet();
+                      $highestRow = $sheetData->getHighestRow(); // e.g. 10 
+                      $highestColumn = $sheetData->getHighestColumn(); 
+                      $highestColumnIndex = \PHPExcel_Cell::columnIndexFromString($highestColumn);
+                     $sheetDatas = $objPHPExcel->getActiveSheet()->toArray(null, true, true, true);
+                     array_shift($sheetDatas);    
+                      for ($row =2; $row <= $highestRow; ++$row) { 
+                          # code...
+                             for ($col = 0; $col <= $highestColumnIndex; ++$col) {
+                                   $ar_data[]=    $sheetData->getCellByColumnAndRow($col, $row)->getValue();
+                          
+                        
+                                  
+                                    }
+                        $this->simpanDariXLS($ar_data);
+        
+                        
+                        $ar_data=array();  
+                          
+                      } 
+                             
+ 
+                             
+                      Yii::$app->getSession()->setFlash('success','Success');
+                  }else{
+                      Yii::$app->getSession()->setFlash('error','Error');
+                  }
+                  //die(print_r($sheetDatas));
+        }   
+
+        return $this->render('import',[
+                'modelImport' => $modelImport,
+            ]);
+              
+      
+
+  }
+
+
+public function actionImport2(){
+   /*     $modelImport = new \yii\base\DynamicModel([
+                    'fileImport'=>'File Import',
+                ]);
+        $modelImport->addRule(['fileImport'],'required');
+        $modelImport->addRule(['fileImport'],'file',['extensions'=>'ods,xls,xlsx'],['maxSize'=>1024*1024]);
+ */
+          $modelImport = new Companies([
+            'fileImport' => 'File Import',
+        ]);
+
+        if(Yii::$app->request->post()){
+            $modelImport->fileImport = \yii\web\UploadedFile::getInstance($modelImport,'fileImport');
+
+            if($modelImport->fileImport){
+                
+                 $inputFileType = \PHPExcel_IOFactory::identify($modelImport->fileImport->tempName);
+
+                      $objReader = \PHPExcel_IOFactory::createReader($inputFileType);
+                      $objPHPExcel = $objReader->load($modelImport->fileImport->tempName);
+                      
+                      $sheetData = $objPHPExcel->getActiveSheet()->toArray(null,true,true,true);
+                $baseRow = 2;
+                while(!empty($sheetData[$baseRow]['B'])){
+                    $model = new \backend\mdata\models\Countries;
+                    $model->name = (string)$sheetData[$baseRow]['B'];
+                   // $model->description = (string)$sheetData[$baseRow]['C'];
+                    $model->save();
+                    $baseRow++;
+                }
+                Yii::$app->getSession()->setFlash('success','Success');
+            }else{
+                Yii::$app->getSession()->setFlash('error','Error');
+            }
+        }
+
+        return $this->render('import',[
+                'modelImport' => $modelImport,
+            ]);
     }
 }
