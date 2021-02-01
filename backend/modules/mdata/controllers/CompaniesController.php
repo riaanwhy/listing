@@ -144,7 +144,7 @@ class CompaniesController extends Controller
 
                 $sector                =  (String)$data[3];
 
-                $subsector             =  (String)$data[4];
+                $sub_sector             =  (String)$data[4];
 
                 $country               =  (String)$data[5];
 
@@ -152,25 +152,38 @@ class CompaniesController extends Controller
 
                 $website               =  $data[7];
 
-                $profil                =  $data[8];
+                $profile                =  $data[8];
 
 
-             $obj = new Companies();
-             $obj = Companies::find()->where(['name'=>$nama])->one();
+               $obj = new Companies();
+               $obj = Companies::find()->where(['name'=>$nama])->one();
                
-               if ($obj->id == null) {
+               if (empty($obj)) {
                     # code...
 
                 $model = new Companies;
                 $model->name = $nama;
+                $model->sic_code = $sic_code;
+                $model->sector = $sector;
+                $model->sub_sector = $sub_sector;
+                $model->country = $country;
+                $model->exchange = $exchange;
+                $model->website = $website;
+                $model->profile = $profile;
                 $model->save();
                 } 
                 else{
 
                 $obj->name = $nama;
+                $model->sic_code = $sic_code;
+                $model->sector = $sector;
+                $model->sub_sector = $sub_sector;
+                $model->country = $country;
+                $model->exchange = $exchange;
+                $model->website = $website;
+                $model->profile = $profile;
                 $obj->save();
                 }
-
                
 
     }
@@ -255,7 +268,7 @@ public function actionImport2(){
                       $sheetData = $objPHPExcel->getActiveSheet()->toArray(null,true,true,true);
                 $baseRow = 2;
                 while(!empty($sheetData[$baseRow]['B'])){
-                    $model = new \backend\mdata\models\Countries;
+                    $model = new \backend\mdata\models\Companies;
                     $model->name = (string)$sheetData[$baseRow]['B'];
                    // $model->description = (string)$sheetData[$baseRow]['C'];
                     $model->save();
