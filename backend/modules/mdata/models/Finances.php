@@ -35,7 +35,7 @@ class Finances extends \yii\db\ActiveRecord
     {
         return 'finances';
     }
-
+     public $fileImport;
     /**
      * {@inheritdoc}
      */
