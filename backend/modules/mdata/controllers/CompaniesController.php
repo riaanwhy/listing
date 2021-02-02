@@ -4,6 +4,8 @@ namespace backend\modules\mdata\controllers;
 
 use Yii;
 use backend\modules\mdata\models\Companies;
+use backend\modules\mdata\models\Countries;
+use backend\modules\mdata\models\Sectors;
 use backend\modules\mdata\models\CompaniesSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -155,8 +157,28 @@ class CompaniesController extends Controller
                 $profile                =  $data[8];
 
 
+               $coun = new Countries();
+               $coun = Countries::find()->where(['name'=>$country])->one(); 
                $obj = new Companies();
-               $obj = Companies::find()->where(['name'=>$nama])->one();
+               $obj = Companies::find()->where(['country'=>$coun->id,'name'=>$nama])->one();
+
+
+               $sect = new Sectors();
+               $sect = Sectors::find()->where(['name'=>$sector])->one();
+               $obj = new Companies;
+               $obj = Companies::find()->where(['sector'=>$sect->id,'name'=>$nama])->one();
+
+               $sect = new Sectors();
+               $sect = Sectors::find()->where(['name'=>$sub_sector])->one();
+               $obj = new Companies;
+               $obj = Companies::find()->where(['sub_sector'=>$sect->id,'name'=>$nama])->one();
+               
+
+        /*       $comp = new Companies();
+               $comp = Companies::find()->where(['name'=>$company_id])->one();
+               $obj = new Finances();
+               $obj = Finances::find()->where(['company_id'=>$comp->id,'year'=>$year])->one(); */
+          //     die(print_r($coun->name));
                
                if (empty($obj)) {
                     # code...
@@ -164,9 +186,9 @@ class CompaniesController extends Controller
                 $model = new Companies;
                 $model->name = $nama;
                 $model->sic_code = $sic_code;
-                $model->sector = $sector;
-                $model->sub_sector = $sub_sector;
-                $model->country = $country;
+                $model->sector = $sect->id;
+                $model->sub_sector = $sect->id;
+                $model->country = $coun->id;
                 $model->exchange = $exchange;
                 $model->website = $website;
                 $model->profile = $profile;
@@ -175,13 +197,13 @@ class CompaniesController extends Controller
                 else{
 
                 $obj->name = $nama;
-                $model->sic_code = $sic_code;
-                $model->sector = $sector;
-                $model->sub_sector = $sub_sector;
-                $model->country = $country;
-                $model->exchange = $exchange;
-                $model->website = $website;
-                $model->profile = $profile;
+                $obj->sic_code = $sic_code;
+                $obj->sector = $sect->id;
+                $obj->sub_sector = $sect->id;
+                $obj->country = $coun->id;
+                $obj->exchange = $exchange;
+                $obj->website = $website;
+                $obj->profile = $profile;
                 $obj->save();
                 }
                
