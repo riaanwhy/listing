@@ -20,6 +20,9 @@ $this->params['breadcrumbs'][] = $this->title;
     <p>
         <?= Html::a(Yii::t('app', 'Create Sectors'), ['create'], ['class' => 'btn btn-success']) ?>
     </p>
+    <p>
+          <?= Html::a(Yii::t('app', 'IMPORT'), ['create'], ['class' => 'btn btn-success']) ?>
+    </p>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,

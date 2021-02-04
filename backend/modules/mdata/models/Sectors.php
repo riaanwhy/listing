@@ -23,6 +23,7 @@ class Sectors extends \yii\db\ActiveRecord
     {
         return 'sectors';
     }
+    public $fileImport;
 
     /**
      * {@inheritdoc}
