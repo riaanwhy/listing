@@ -56,7 +56,7 @@ $this->params['breadcrumbs'][] = $this->title;
              ['class' => 'yii\grid\SerialColumn',
                 'header'=>'no',
             ],
-            'id',
+            
        //     'company_id',
               [
                 'attribute' => 'company_id',
