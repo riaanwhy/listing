@@ -59,7 +59,9 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
+            ['class' => 'yii\grid\SerialColumn',
+                'header'=>'no',
+            ],
             //'id',
             'sic_code',
                 'name',
@@ -112,8 +114,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
             //'country',
-            //'exchange',
-            //'website',
+            'exchange',
+            'website',
             //'profile:ntext',
             //'created_at',
             //'updated_at',

@@ -13,7 +13,26 @@ use backend\modules\mdata\models\Finances;
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<div class="companies-form">
+<div class="container">
+
+<div class="col-md-2">
+    
+</div>
+
+
+<div class="col-md-8">
+<div class="box box-primary">
+            <div class="box-header with-border">
+              <h3 class="box-title"> Form Add Companies
+              </h3>
+                 <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                </button>
+               
+              </div>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
 
     <?php $form = ActiveForm::begin(); ?>
 
@@ -60,5 +79,13 @@ use backend\modules\mdata\models\Finances;
     </div>
 
     <?php ActiveForm::end(); ?>
+    </div>
+
+
+</div>
+
+<div class="col-md-2">
+    
+</div>
 
 </div>
