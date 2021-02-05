@@ -62,7 +62,7 @@ $this->params['breadcrumbs'][] = $this->title;
             
             [
                 'attribute' => 'name',
-                'filter' => ArrayHelper::map(Countries::find()->asArray()->all(), 'name', 'name'),
+                'filter' => ArrayHelper::map(Sectors::find()->asArray()->all(), 'name', 'name'),
                 'filterType' => GridView::FILTER_SELECT2,
                 'filterWidgetOptions' => [
                     'options' => ['prompt' => ''],
