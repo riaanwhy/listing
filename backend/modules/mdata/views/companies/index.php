@@ -4,6 +4,8 @@ use yii\helpers\Html;
 use backend\modules\mdata\models\Sectors;
 use backend\modules\mdata\models\Countries;
 use kartik\grid\GridView;
+
+use yii\widgets\Pjax;
 use yii\helpers\ArrayHelper;
 use kartik\select2\Select2;
 /* @var $this yii\web\View */
@@ -55,14 +57,21 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
 
-    <?= GridView::widget([
+<?=Html::beginForm(['bulkacc'],'post');?>
+
+    <?php Pjax::begin(); echo GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
+
+        ['class' => 'yii\grid\CheckboxColumn',
+            'header'=>'Selected'
+            ],
+            //'id',
             ['class' => 'yii\grid\SerialColumn',
                 'header'=>'no',
             ],
-            //'id',
+
             'sic_code',
                 'name',
 
@@ -124,7 +133,12 @@ $this->params['breadcrumbs'][] = $this->title;
 
             ['class' => 'yii\grid\ActionColumn'],
         ],
-    ]); ?>
+    ]);  Pjax::end(); ?>
+
+
+
+<?=Html::submitButton('Accept', ['class' => 'btn btn-info','name'=>'trm']);?>
+<?= Html::endForm();?> 
 
     </div> <!--box body -->
 </div> <!-- box primary-->

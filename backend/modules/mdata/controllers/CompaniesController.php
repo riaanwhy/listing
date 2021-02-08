@@ -6,6 +6,9 @@ use Yii;
 use backend\modules\mdata\models\Companies;
 use backend\modules\mdata\models\Countries;
 use backend\modules\mdata\models\Sectors;
+use backend\modules\mdata\models\TmpSelected;
+
+
 use backend\modules\mdata\models\CompaniesSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -267,13 +270,7 @@ class CompaniesController extends Controller
 
 
 public function actionImport2(){
-   /*     $modelImport = new \yii\base\DynamicModel([
-                    'fileImport'=>'File Import',
-                ]);
-        $modelImport->addRule(['fileImport'],'required');
-        $modelImport->addRule(['fileImport'],'file',['extensions'=>'ods,xls,xlsx'],['maxSize'=>1024*1024]);
- */
-          $modelImport = new Companies([
+       $modelImport = new Companies([
             'fileImport' => 'File Import',
         ]);
 
@@ -305,5 +302,72 @@ public function actionImport2(){
         return $this->render('import',[
                 'modelImport' => $modelImport,
             ]);
+    }
+
+
+     public function actionBulkacc(){
+    $action=Yii::$app->request->post('action');
+    $selection=(array)Yii::$app->request->post('selection');//typecasting
+    
+    if ($selection == null ) {
+        # code... 
+        Yii::$app->session->setFlash('error', "No one's data selected !!  Please, Selected one data or more to this action ");
+    }
+    else {
+
+
+                if (isset($_POST['trm'])) {
+                      foreach($selection as $id){
+
+                        $selected=Companies::findOne((int)$id);//make a typecasting
+                      
+                        $objTmp = new TmpSelected();
+                        $objTmp->companies_id = $selected->id;
+                        $objTmp->save();
+
+                   
+
+                      }
+                  Yii::$app->session->setFlash('success', "Succes selected data ");
+
+                      
+                       return $this->redirect(['/mdata/tmp-selected/index']);
+                        Yii::$app->session->setFlash('success', "Succes selected data ");
+
+                }//tutup if
+
+    }
+
+
+     return $this->redirect('index');
+  }
+
+
+
+    public function actionExptmp(){
+
+            $fileType = 'Excel2007';
+       $template = Yii::getAlias('@backend/web').'/format_import_companies.xlsx';
+                
+            $objReader = \PHPExcel_IOFactory::createReader($fileType);
+            $objPHPExcel = $objReader->load($template);
+
+            $objPHPExcel->getProperties()->setCreator("Riyan Wahyudi");
+            $objPHPExcel->getProperties()->setLastModifiedBy("Riyan Wahyudi");
+            $objPHPExcel->getProperties()->setTitle("Office 2007 XLSX Test Document");
+            $objPHPExcel->getProperties()->setSubject("Office 2007 XLSX Test Document");
+            $objPHPExcel->getProperties()->setDescription("Test document , generated using PHP classes.");
+
+           
+            $objWriter = new \PHPExcel_Writer_Excel2007($objPHPExcel,'Excel2007');
+            header('Content-type: application/vnd.ms-excel');
+     header('Content-Disposition: attachment; filename="import_companies.xlsx"');
+
+            header("Pragma: no-cache");
+            header("Expires: 0");
+           
+            // Write file to the browser
+            $objWriter->save('php://output');
+           // $objWriter->save($template);
     }
 }
