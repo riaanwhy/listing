@@ -24,7 +24,7 @@ use yii\helpers\Html;
 
 
                    &nbsp;
-                    
- <?php  echo Html::a('Template Import', ['exptmp'], ['class' => 'btn btn-danger']) ?>
+ 
+ <?php echo Html::a('Template Import', ['/../backend/web/format_import_finance.xlsx'], ['class' => 'btn btn-warning grid-button']);?>&nbsp;
 <?php ActiveForm::end();?>
 <br>

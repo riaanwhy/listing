@@ -1,6 +1,7 @@
 <?php
 
 use yii\helpers\Html;
+use backend\modules\mdata\models\Sectors;
 use backend\modules\mdata\models\Countries;
 use kartik\grid\GridView;
 use yii\helpers\ArrayHelper;
@@ -12,7 +13,11 @@ use kartik\select2\Select2;
 $this->title = Yii::t('app', 'Countries');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="box box-primary">
+
+
+
+
+    <div class="box box-primary">
             <div class="box-header with-border">
               <h3 class="box-title"> Data Countries
               </h3>
@@ -46,14 +51,17 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="col-md-9"></div>
                
             </div>        
+   
+
+
+
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-             ['class' => 'yii\grid\SerialColumn',
-                'header'=>'no',
-            ],
-            'name',
+            ['class' => 'yii\grid\SerialColumn',
+            'header'=>'no' ],
+            
             [
                 'attribute' => 'name',
                 'filter' => ArrayHelper::map(Countries::find()->asArray()->all(), 'name', 'name'),

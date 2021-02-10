@@ -20,6 +20,23 @@ class MyComponent extends Component {
 /* 	public function hello(){
 		echo 'Hallo';
 	} */
+
+    
+  public function tahun()
+  {
+
+   $tahun = 2011;
+   $now = date('Y');
+    $data=[$tahun];
+
+       for ($i=$tahun; $i <= $now ; $i++) { 
+         $data[$tahun] = $tahun;
+
+         $tahun++;
+       }
+
+    return $data;
+  }
 	
     public function getTanggalExcel($tanggal_excel) {
         $d=substr($tanggal_excel,0,2);
