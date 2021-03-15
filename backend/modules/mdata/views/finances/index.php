@@ -5,6 +5,7 @@ use backend\modules\mdata\models\Companies;
 use kartik\grid\GridView;
 use yii\helpers\ArrayHelper;
 use kartik\select2\Select2;
+use kartik\export\ExportMenu;
 /* @var $this yii\web\View */
 /* @var $searchModel backend\modules\mdata\models\FinancesSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -46,7 +47,42 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="col-md-9"></div>
                
             </div>        
-   
+<?php
+$gridColumns = [
+    ['class' => 'yii\grid\SerialColumn'],
+    'no',
+  //  'company_id',
+     [
+        'header'=>'company_id',
+        'value'=>'company.name',
+        'options'=>['width'=>'200px']],
+    'year',
+    'sales',
+    'cogs',
+    'adm_expense',
+    'sales_expense',
+    'dep_expense',
+    'gm',
+    'nm',
+    'gm_percent',
+    'nm_percent',
+    
+    ['class' => 'yii\grid\ActionColumn'],
+];
+
+// Renders a export dropdown menu
+echo ExportMenu::widget([
+    'dataProvider' => $dataProvider,
+    'columns' => $gridColumns
+]);
+
+// You can choose to render your own GridView separately
+//echo \kartik\grid\GridView::widget([
+ //   'dataProvider' => $dataProvider,
+  //  'filterModel' => $searchModel,
+   // 'columns' => $gridColumns
+//]); 
+ ?>      
 
 
     <?= GridView::widget([

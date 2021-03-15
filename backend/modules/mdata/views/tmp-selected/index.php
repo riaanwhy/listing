@@ -1,9 +1,11 @@
 <?php
 
 use yii\helpers\Html;
-use yii\grid\GridView;
-
+use \yii\bootstrap\Collapse;
 use kartik\select2\Select2;
+use kartik\export\ExportMenu;
+use kartik\grid\GridView;
+
 /* @var $this yii\web\View */
 /* @var $searchModel backend\modules\mdata\models\TmpSelectedSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -25,7 +27,35 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="box-body">
 
                     <div class="col-md-7">
+    <?php 
 
+$gridColumns = [
+    ['class' => 'yii\grid\SerialColumn'],
+  
+   'no',
+     [
+        'header'=>'Companies',
+        'value'=>'company.name',
+        'options'=>['width'=>'200px']],
+    ['class' => 'yii\grid\ActionColumn'],
+
+];
+
+// Renders a export dropdown menu
+echo ExportMenu::widget([
+    'dataProvider' => $dataProvider,
+    'columns' => $gridColumns,
+]);
+
+// You can choose to render your own GridView separately
+//echo \kartik\grid\GridView::widget([
+ //   'dataProvider' => $dataProvider,
+  //  'filterModel' => $searchModel,
+   // 'columns' => $gridColumns
+//]);
+
+
+ ?>
 
 
                     <?=Html::beginForm(['bulkacc'],'post');?>
@@ -62,6 +92,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?=Html::submitButton('Delete', ['class' => 'btn btn-danger','name'=>'del']);?> |
     </div>
 <div class="col-sm-3">
+
           <?php
 
 

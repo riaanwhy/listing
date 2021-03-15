@@ -8,6 +8,7 @@ use kartik\grid\GridView;
 use yii\widgets\Pjax;
 use yii\helpers\ArrayHelper;
 use kartik\select2\Select2;
+use kartik\export\ExportMenu;
 /* @var $this yii\web\View */
 /* @var $searchModel backend\modules\mdata\models\CompaniesSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -15,6 +16,7 @@ use kartik\select2\Select2;
 $this->title = Yii::t('app', 'Companies');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
+
 
 
     <div class="box box-primary">
@@ -51,7 +53,43 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="col-md-9"></div>
                
             </div>        
-   
+<?php
+$gridColumns = [
+    ['class' => 'yii\grid\SerialColumn'],
+    'no',
+    'sic_code',
+    'name',
+    [
+        'header'=>'Sector',
+        'value'=>'sector0.name',
+        'options'=>['width'=>'200px']],
+    [
+        'header'=>'Sub_sector',
+        'value'=>'subSector.name',
+        'options'=>['width'=>'200px']],
+    [
+        'header'=>'Country',
+        'value'=>'country0.name',
+        'options'=>['width'=>'200px']],
+    'exchange',
+    'website',
+    ['class' => 'yii\grid\ActionColumn'],
+
+];
+
+// Renders a export dropdown menu
+echo ExportMenu::widget([
+    'dataProvider' => $dataProvider,
+    'columns' => $gridColumns
+]);
+
+// You can choose to render your own GridView separately
+//echo \kartik\grid\GridView::widget([
+ //   'dataProvider' => $dataProvider,
+  //  'filterModel' => $searchModel,
+   // 'columns' => $gridColumns
+//]); 
+ ?>   
 
 
 
@@ -80,8 +118,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => ArrayHelper::map(Sectors::find()->asArray()->all(), 'id', 'name'),
                 'filterType' => GridView::FILTER_SELECT2,
                 'filterWidgetOptions' => [
-                    'options' => ['prompt' => ''],
-                    'pluginOptions' => [
+                    'options' => ['placeholder' => 'name',
+                     'autocomplete' => 'off'],
+                    'pluginOptions' => ['multiple' => true,
                         'allowClear' => true,
                         'width'=>'200px'
                     ],
@@ -97,8 +136,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => ArrayHelper::map(Sectors::find()->asArray()->all(), 'id', 'name'),
                 'filterType' => GridView::FILTER_SELECT2,
                 'filterWidgetOptions' => [
-                    'options' => ['prompt' => ''],
-                    'pluginOptions' => [
+                    'options' => ['placeholder' => 'name',
+                    'autocomplete' => 'off'],
+                    'pluginOptions' => [ 'multiple' => true,
                         'allowClear' => true,
                         'width'=>'200px'
                     ],
@@ -108,12 +148,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
             [
+                
                 'attribute' => 'country',
                 'filter' => ArrayHelper::map(Countries::find()->asArray()->all(), 'id', 'name'),
                 'filterType' => GridView::FILTER_SELECT2,
                 'filterWidgetOptions' => [
-                    'options' => ['prompt' => ''],
-                    'pluginOptions' => [
+                    'options' => ['placeholder' => 'name',
+                    'autocomplete' => 'off'],
+                    'pluginOptions' => ['multiple' => true,
                         'allowClear' => true,
                         'width'=>'200px'
                     ],

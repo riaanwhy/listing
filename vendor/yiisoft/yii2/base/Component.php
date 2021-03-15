@@ -9,6 +9,8 @@ namespace yii\base;
 
 use Yii;
 use yii\helpers\StringHelper;
+use yii\helpers\Html;
+use kartik\grid\GridView;
 
 /**
  * Component is the base class that implements the *property*, *event* and *behavior* features.

@@ -50,12 +50,6 @@ class CompaniesSearch extends Companies
 
         $this->load($params);
 
-        if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
-            return $dataProvider;
-        }
-
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
@@ -68,6 +62,10 @@ class CompaniesSearch extends Companies
             'created_by' => $this->created_by,
             'updated_by' => $this->updated_by,
         ]);
+
+        $query->andFilterWhere(['IN', 'sector', $this->name]);
+        $query->andFilterWhere(['IN', 'sub_sector', $this->name]);
+        $query->andFilterWhere(['IN', 'country', $this->name]);
 
         $query->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'exchange', $this->exchange])

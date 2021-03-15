@@ -26,6 +26,7 @@
         "kartik-v/yii2-widget-activeform": "@dev",
         "kartik-v/yii2-field-range": "dev-master",
         "dmstr/yii2-adminlte-asset": "^2.1",
+        "pheme/yii2-toggle-column": "*",
        
         "reportico/yii2-reportico": "dev-master",
         "yii2mod/yii2-rbac": "*",

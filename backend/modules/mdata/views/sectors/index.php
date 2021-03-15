@@ -6,6 +6,7 @@ use backend\modules\mdata\models\Countries;
 use kartik\grid\GridView;
 use yii\helpers\ArrayHelper;
 use kartik\select2\Select2;
+use kartik\export\ExportMenu;
 /* @var $this yii\web\View */
 /* @var $searchModel backend\modules\mdata\models\SectorsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -49,6 +50,28 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="col-md-9"></div>
                
             </div>        
+<?php
+$gridColumns = [
+    ['class' => 'yii\grid\SerialColumn'],
+    'no',
+    'name',
+  
+];
+
+// Renders a export dropdown menu
+echo ExportMenu::widget([
+    'dataProvider' => $dataProvider,
+    'columns' => $gridColumns
+]);
+
+// You can choose to render your own GridView separately
+//echo \kartik\grid\GridView::widget([
+ //   'dataProvider' => $dataProvider,
+  //  'filterModel' => $searchModel,
+   // 'columns' => $gridColumns
+//]); 
+ ?>     
+
    
 
 
@@ -62,7 +85,7 @@ $this->params['breadcrumbs'][] = $this->title;
             
             [
                 'attribute' => 'name',
-                'filter' => ArrayHelper::map(Countries::find()->asArray()->all(), 'name', 'name'),
+                'filter' => ArrayHelper::map(Sectors::find()->asArray()->all(), 'name', 'name'),
                 'filterType' => GridView::FILTER_SELECT2,
                 'filterWidgetOptions' => [
                     'options' => ['prompt' => ''],
